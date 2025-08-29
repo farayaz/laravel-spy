@@ -53,6 +53,42 @@ This will create a `config/spy.php` file where you can configure the following o
 
     'exclude_urls' => explode(',', env('SPY_EXCLUDE_URLS', '')),
     'obfuscates' => explode(',', env('SPY_OBFUSCATES', 'password')),
+
+    'request_body_exclude_content_types' => [
+        // 'video/',
+        // 'audio/',
+        // 'application/pdf',
+        // 'application/zip',
+        // 'application/x-zip-compressed',
+        // 'application/octet-stream',
+        // 'multipart/form-data',
+    ],
+
+    'request_body_exclude_content_types' => [
+        // 'video/',
+        // 'audio/',
+        // 'application/pdf',
+        // 'application/zip',
+        // 'application/x-zip-compressed',
+        // 'application/octet-stream',
+        // 'multipart/form-data',
+    ],
+```
+
+### Excluding Content Types from Logging
+
+You can configure Laravel Spy to exclude specific content types from being logged for both request and response bodies. This is useful for binary data, images, videos, or other content you do not want included in logs.
+
+To enable this, you can configure the following options on `config/spy.php`:
+
+```php
+'request_body_exclude_content_types' => [
+    'image/', // 'image/' will exclude any image-type logging in request bodies such as 'image/png', 'image/jpeg', and so on
+],
+
+'response_body_exclude_content_types' => [
+    'audio/', // 'audio/' will exclude any audio-type logging in response bodies such as 'audio/mp3', 'audio/wav', and so on
+],
 ```
 
 ## Usage
