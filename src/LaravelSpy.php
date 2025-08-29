@@ -37,7 +37,11 @@ class LaravelSpy
 
     protected static function handleRequest(RequestInterface $request): ?HttpLog
     {
-        $requestBody = self::parseContent($request->getBody()->getContents(), $request->getHeaderLine('Content-Type'));
+        $requestBody = self::parseContent(
+            'request',
+            $request->getBody()->getContents(),
+            $request->getHeaderLine('Content-Type')
+        );
 
         return HttpLog::create([
             'url' => urldecode(self::obfuscate($request->getUri())),
@@ -50,7 +54,11 @@ class LaravelSpy
     protected static function handleResponse(ResponseInterface $response, ?HttpLog $httpLog): ResponseInterface
     {
         if ($httpLog) {
-            $responseBody = self::parseContent($response->getBody(), $response->getHeaderLine('Content-Type'));
+            $responseBody = self::parseContent(
+                'response',
+                $response->getBody(),
+                $response->getHeaderLine('Content-Type')
+            );
             $httpLog->update([
                 'status' => $response->getStatusCode(),
                 'response_body' => self::obfuscate($responseBody),
@@ -73,10 +81,19 @@ class LaravelSpy
         throw $exception;
     }
 
-    public static function parseContent($content, ?string $contentType): mixed
+    public static function parseContent(string $context, mixed $content, ?string $contentType = null): mixed
     {
         if (empty($content)) {
             return null;
+        }
+
+        $excludeTypes = config('spy.' . $context . '_body_exclude_content_types', []);
+        if (! empty($contentType)) {
+            foreach ($excludeTypes as $excludeType) {
+                if (str_contains($contentType, $excludeType)) {
+                    return ['content excluded by configuration'];
+                }
+            }
         }
 
         if (str_contains($contentType, 'application/json') || json_decode($content, true) !== null) {

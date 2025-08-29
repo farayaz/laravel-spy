@@ -35,4 +35,31 @@ return [
     * Number of days to retain logs before cleaning.
     */
     'clean_days' => (int) env('SPY_CLEAN_DAYS', 30),
+
+    /*
+    * Content types to exclude from request body logging.
+    */
+    'request_body_exclude_content_types' => [
+        'image/',
+        'video/',
+        'audio/',
+        'application/pdf',
+        'application/zip',
+        'application/x-zip-compressed',
+        'application/octet-stream',
+        'multipart/form-data',
+    ],
+
+    /*
+    * Content types to exclude from response body logging.
+    */
+    'response_body_exclude_content_types' => [
+        'image/',
+        'video/',
+        'audio/',
+        'application/pdf',
+        'application/zip',
+        'application/x-zip-compressed',
+        'application/octet-stream',
+    ],
 ];
