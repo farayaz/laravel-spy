@@ -1,0 +1,23 @@
+services:
+  laravel-spy-test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: laravel-spy-test
+    volumes:
+      - .:/var/www
+      - /var/www/vendor
+    working_dir: /var/www
+    environment:
+      - APP_ENV=testing
+      - DB_CONNECTION=sqlite
+      - DB_DATABASE=:memory:
+      - SPY_ENABLED=true
+      - SPY_TABLE_NAME=http_logs
+    command: vendor/bin/phpunit
+    networks:
+      - laravel-spy-network
+
+networks:
+  laravel-spy-network:
+    driver: bridge
