@@ -45,50 +45,43 @@ php artisan migrate
 ```
 This will create a `config/spy.php` file where you can configure the following options:
 
+### Basic Configuration
+
+Configure these via environment variables:
+```bash
+SPY_ENABLED=true
 ```
-    'table_name' => 'http_logs',
 
-    'enabled' => env('SPY_ENABLED', true),
-    'db_connection' => env('SPY_DB_CONNECTION'),
+### URL Exclusions
 
-    'exclude_urls' => explode(',', env('SPY_EXCLUDE_URLS', '')),
-    'obfuscates' => explode(',', env('SPY_OBFUSCATES', 'password')),
+Exclude specific URLs from being logged via environment variable:
+```bash
+SPY_EXCLUDE_URLS=api/health,ping,status
+```
 
-    'request_body_exclude_content_types' => [
-        // 'video/',
-        // 'audio/',
-        // 'application/pdf',
-        // 'application/zip',
-        // 'application/x-zip-compressed',
-        // 'application/octet-stream',
-        // 'multipart/form-data',
-    ],
+### Data Obfuscation
 
-    'request_body_exclude_content_types' => [
-        // 'video/',
-        // 'audio/',
-        // 'application/pdf',
-        // 'application/zip',
-        // 'application/x-zip-compressed',
-        // 'application/octet-stream',
-        // 'multipart/form-data',
-    ],
+Laravel Spy can obfuscate sensitive data in your logs. By default, it obfuscates `password` and `token` fields, but you can customize this via environment variables:
+
+```bash
+SPY_OBFUSCATES=password,token,api_key,secret
+SPY_OBFUSCATION_MASK=***HIDDEN***
 ```
 
 ### Excluding Content Types from Logging
 
 You can configure Laravel Spy to exclude specific content types from being logged for both request and response bodies. This is useful for binary data, images, videos, or other content you do not want included in logs.
+```bash
+SPY_REQUEST_BODY_EXCLUDE_CONTENT_TYPES=image/
+SPY_RESPONSE_BODY_EXCLUDE_CONTENT_TYPES=video/,application/pdf
+```
 
-To enable this, you can configure the following options on `config/spy.php`:
+### Automatic Log Retention
 
-```php
-'request_body_exclude_content_types' => [
-    'image/', // 'image/' will exclude any image-type logging in request bodies such as 'image/png', 'image/jpeg', and so on
-],
+Configure how long logs should be retained before automatic cleanup via environment variable:
 
-'response_body_exclude_content_types' => [
-    'audio/', // 'audio/' will exclude any audio-type logging in response bodies such as 'audio/mp3', 'audio/wav', and so on
-],
+```bash
+SPY_CLEAN_DAYS=7  # Keep logs for 7 days (default is 30)
 ```
 
 ## Usage
@@ -102,14 +95,13 @@ Once installed and configured, Laravel Spy automatically tracks all outgoing HTT
 * Response HTTP Status code
 
 ## Example:
-Once you’ve installed `Laravel-Spy` via Composer and published the configuration, open your `web.php` file and add the following line to start logging results into the `http_logs` table in your database:
+After installing `laravel-spy` and publishing the configuration, any usage of Laravel's HTTP client (for example, in your controllers or jobs) will be automatically logged.
+
+Laravel Spy will log the details of this outgoing request to the `http_logs` table in your database.
 
 ```php
-Route::get("/spy", function () {
-    Http::get('https://github.com/farayaz/laravel-spy/');
-});
+Http::get('https://github.com/farayaz/laravel-spy/');
 ```
-Now head to the `http_logs` table to view the logged parameters.
 
 ## Cleaning up logs
 
