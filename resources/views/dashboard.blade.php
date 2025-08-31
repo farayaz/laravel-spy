@@ -279,6 +279,7 @@
             }
         },
         series: [{
+            name: 'Counts',
             data: [
                     @foreach($recentByDay as $b)
                 {
