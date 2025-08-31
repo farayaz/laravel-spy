@@ -7,6 +7,9 @@
 
     <title>Laravel Spy · Dashboard</title>
 
+    <link rel="preconnect" href="https://fonts.bunny.net">
+    <link href="https://fonts.bunny.net/css?family=jetbrains-mono:300" rel="stylesheet"/>
+
     <style>
         :root {
             --bg: #0b1020;
@@ -19,6 +22,7 @@
         }
 
         * {
+            font-family: 'JetBrains Mono', monospace !important;
             box-sizing: border-box;
         }
 
