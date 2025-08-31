@@ -6,7 +6,6 @@ use Carbon\CarbonImmutable;
 use Farayaz\LaravelSpy\Models\HttpLog;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
-use Illuminate\Support\Facades\DB;
 
 class LaravelSpyController extends Controller
 {
@@ -19,6 +18,8 @@ class LaravelSpyController extends Controller
             '30d' => CarbonImmutable::now()->subDays(30),
             default => CarbonImmutable::now()->subDay(),
         };
+
+        $driver = (new HttpLog)->getConnection()->getDriverName();
 
         $base = HttpLog::query()->whereDate('created_at', '>=', $from);
 
@@ -37,32 +38,45 @@ class LaravelSpyController extends Controller
             ->limit(10)
             ->get();
 
-        // Recent activity by day (for sparkline)
-        $recentByDay = (clone $base)
+        $chart = (clone $base)
             ->selectRaw(
-                DB::raw(
-                    match (DB::getDriverName()) {
-                        'mysql' => "DATE_FORMAT(created_at, '%Y-%m-%d') as bucket",
-                        'pgsql' => "to_char(date_trunc('day', created_at), 'YYYY-MM-DD') as bucket",
-                        'sqlite' => "strftime('%Y-%m-%d', created_at) as bucket",
-                        default => "created_at as bucket",
-                    } . ", COUNT(*) as c"
-                )
+                $this->getChartSelectRaw($driver, $period)
             )
             ->groupBy('bucket')
-            ->orderByDesc('bucket')
+            ->orderBy('bucket')
             ->get();
 
-        return view('spy::dashboard', [
-            'period' => $period,
-            'from' => $from,
-            'total' => $total,
-            'count2xx' => $count2xx,
-            'count4xx' => $count4xx,
-            'count5xx' => $count5xx,
-            'count500' => $count500,
-            'topFailures' => $topFailures,
-            'recentByDay' => $recentByDay,
-        ]);
+        return view('spy::dashboard', compact(
+            'period',
+            'from',
+            'total',
+            'count2xx',
+            'count4xx',
+            'count5xx',
+            'count500',
+            'topFailures',
+            'chart'
+        ));
+    }
+
+    /**
+     * Get the appropriate SELECT RAW query based on database driver
+     */
+    private function getChartSelectRaw(string $driver, string $period): string
+    {
+        return match ($driver) {
+            'sqlite' => match ($period) {
+                '24h' => "strftime('%Y-%m-%d %H:00', created_at) as bucket, COUNT(*) as c",
+                default => "strftime('%Y-%m-%d', created_at) as bucket, COUNT(*) as c",
+            },
+            'pgsql' => match ($period) {
+                '24h' => "to_char(created_at, 'YYYY-MM-DD HH24:00') as bucket, COUNT(*) as c",
+                default => "to_char(created_at, 'YYYY-MM-DD') as bucket, COUNT(*) as c",
+            },
+            default => match ($period) { // MySQL and others
+                '24h' => "DATE_FORMAT(created_at, '%Y-%m-%d %H:00') as bucket, COUNT(*) as c",
+                default => 'DATE(created_at) as bucket, COUNT(*) as c',
+            },
+        };
     }
 }

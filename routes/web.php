@@ -7,6 +7,5 @@ Route::group([
     'prefix' => config('spy.dashboard.prefix', 'spy'),
     'middleware' => config('spy.dashboard.middleware', ['web']),
 ], function () {
-    Route::get('/', [LaravelSpyController::class, 'index'])->name('spy.dashboard');
+    Route::get('/', [LaravelSpyController::class, 'index'])->name('spy.dashboard.index');
 });
-

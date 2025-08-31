@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -8,7 +9,7 @@
     <title>Laravel Spy · Dashboard</title>
 
     <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=jetbrains-mono:300" rel="stylesheet"/>
+    <link href="https://fonts.bunny.net/css?family=jetbrains-mono:300" rel="stylesheet" />
 
     <style>
         :root {
@@ -63,7 +64,7 @@
         .grid {
             display: grid;
             gap: 12px;
-            grid-template-columns:repeat(5, 1fr);
+            grid-template-columns: repeat(5, 1fr);
         }
 
         .kpi {
@@ -106,7 +107,8 @@
             border-collapse: collapse;
         }
 
-        th, td {
+        th,
+        td {
             padding: 10px 12px;
             border-bottom: 1px solid #1f2942;
             text-align: left;
@@ -157,145 +159,149 @@
 </head>
 
 <body>
-<div class="wrap">
-    <header>
-        <h1>Laravel Spy · Dashboard</h1>
-        <form method="get">
-            <label class="muted">
-                Period
-                <select name="period" onchange="this.form.submit()">
-                    <option value="24h" {{ $period==='24h'?'selected':'' }}>Last 24h</option>
-                    <option value="7d" {{ $period==='7d'?'selected':'' }}>Last 7 days</option>
-                    <option value="30d" {{ $period==='30d'?'selected':'' }}>Last 30 days</option>
-                </select>
-            </label>
-        </form>
-    </header>
+    <div class="wrap">
+        <header>
+            <h1>Laravel Spy · Dashboard</h1>
+            <form method="get">
+                <label class="muted">
+                    Period
+                    <select name="period" onchange="this.form.submit()">
+                        <option value="24h" {{ $period === '24h' ? 'selected' : '' }}>Last 24h</option>
+                        <option value="7d" {{ $period === '7d' ? 'selected' : '' }}>Last 7 days</option>
+                        <option value="30d" {{ $period === '30d' ? 'selected' : '' }}>Last 30 days</option>
+                    </select>
+                </label>
+            </form>
+        </header>
 
-    <section class="card">
-        <div class="grid">
-            <div class="kpi">
-                <div class="card">
-                    <b>{{ number_format($total) }}</b><small>Total</small>
+        <section class="card">
+            <div class="grid">
+                <div class="kpi">
+                    <div class="card">
+                        <b>{{ number_format($total) }}</b><small>Total</small>
+                    </div>
                 </div>
-            </div>
-            <div class="kpi ok">
-                <div class="card">
-                    <b>{{ number_format($count2xx) }}</b><small>2xx</small>
+                <div class="kpi ok">
+                    <div class="card">
+                        <b>{{ number_format($count2xx) }}</b><small>2xx</small>
+                    </div>
                 </div>
-            </div>
-            <div class="kpi warn">
-                <div class="card">
-                    <b>{{ number_format($count4xx) }}</b><small>4xx</small>
-                </div>
-            </div>
-
-            <div class="kpi bad">
-                <div class="card">
-                    <b>{{ number_format($count5xx) }}</b><small>5xx</small>
-                </div>
-            </div>
-
-            <div class="kpi bad">
-                <div class="card">
-                    <b>{{ number_format($count500) }}</b><small>HTTP 500</small>
-                </div>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="card" style="flex:1">
-                <h3 class="muted" style="margin:0 0 8px 0; font-size:13px;">Requests over time</h3>
-
-                <div class="muted" style="margin-top:6px; font-size:12px;">
-                    From {{ $from->format('Y-m-d H:i') }} to now
+                <div class="kpi warn">
+                    <div class="card">
+                        <b>{{ number_format($count4xx) }}</b><small>4xx</small>
+                    </div>
                 </div>
 
-                <div id="chart" style="width: 100%;height: 100px"></div>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="card" style="flex:1">
-                <h3 class="muted" style="margin:0 0 8px 0; font-size:13px;">Top failing URLs (5xx)</h3>
-
-                <div class="muted" style="margin-top:6px; font-size:12px;">
-                    From {{ $from->format('Y-m-d H:i') }} to now
+                <div class="kpi bad">
+                    <div class="card">
+                        <b>{{ number_format($count5xx) }}</b><small>5xx</small>
+                    </div>
                 </div>
 
-                <table style="width: 100%">
-                    <thead>
-                    <tr>
-                        <th style="width:52%">URL</th>
-                        <th>Failures</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    @forelse($topFailures as $row)
-                        <tr>
-                            <td><code style="font-size:12px">{{ Str::limit($row->url, 90) }}</code></td>
-                            <td>{{ $row->failures }}</td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="2" class="muted">No 5xx requests in the selected period.</td>
-                        </tr>
-                    @endforelse
-                    </tbody>
-                </table>
+                <div class="kpi bad">
+                    <div class="card">
+                        <b>{{ number_format($count500) }}</b><small>HTTP 500</small>
+                    </div>
+                </div>
             </div>
-        </div>
 
-    </section>
+            <div class="row">
+                <div class="card" style="flex:1">
+                    <h3 class="muted" style="margin:0 0 8px 0; font-size:13px;">Requests over time</h3>
 
-    <footer>
-        Built
-        <a href="https://github.com/farayaz/laravel-spy" target="_blank" rel="noreferrer">
-            Laravel Spy
-        </a>
-        with ❤️
-    </footer>
-</div>
+                    <div class="muted" style="margin-top:6px; font-size:12px;">
+                        From {{ $from->format('Y-m-d H:i') }} to now
+                    </div>
+
+                    <div id="chart" style="width: 100%;height: 100px"></div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="card" style="flex:1">
+                    <h3 class="muted" style="margin:0 0 8px 0; font-size:13px;">Top failing URLs (5xx)</h3>
+
+                    <div class="muted" style="margin-top:6px; font-size:12px;">
+                        From {{ $from->format('Y-m-d H:i') }} to now
+                    </div>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>URL</th>
+                                <th>Failures</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($topFailures as $row)
+                                <tr>
+                                    <td>{{ $row->url }}</td>
+                                    <td>{{ $row->failures }}</td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="2" class="muted" style="text-align: center;">No 5xx requests in the
+                                        selected period.</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </section>
+
+        <footer>
+            Built
+            <a href="https://github.com/farayaz/laravel-spy" target="_blank" rel="noreferrer">
+                Laravel Spy
+            </a>
+            with ❤️
+        </footer>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
+    <script>
+        options = {
+            theme: {
+                mode: 'dark',
+            },
+            tooltip: {
+                theme: 'dark',
+            },
+            chart: {
+                type: 'line',
+                height: '500px',
+                background: '#141b2d',
+                zoom: {
+                    enabled: false
+                }
+            },
+            stroke: {
+                curve: 'smooth',
+            },
+            plotOptions: {
+                bar: {
+                    horizontal: false
+                }
+            },
+            series: [{
+                data: [
+                    @foreach ($chart as $b)
+                        {
+                            x: '{{ $b->bucket }}',
+                            y: {{ $b->c }}
+                        },
+                    @endforeach
+                ]
+            }]
+        }
+
+        var chart = new ApexCharts(document.querySelector("#chart"), options);
+
+        chart.render();
+    </script>
 </body>
+
 </html>
-
-<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-
-<script>
-    options = {
-        theme: {
-            mode: 'dark',
-        },
-        tooltip: {
-            theme: 'dark',
-        },
-        chart: {
-            type: 'line',
-            height: '500px',
-            background: '#141b2d'
-        },
-        stroke: {
-            curve: 'smooth',
-        },
-        plotOptions: {
-            bar: {
-                horizontal: false
-            }
-        },
-        series: [{
-            name: 'Counts',
-            data: [
-                    @foreach($recentByDay as $b)
-                {
-                    x: '{{$b->bucket}}',
-                    y: {{$b->c}}
-                },
-                @endforeach
-            ]
-        }]
-    }
-
-    var chart = new ApexCharts(document.querySelector("#chart"), options);
-
-    chart.render();
-</script>

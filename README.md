@@ -31,19 +31,35 @@ composer require farayaz/laravel-spy
 ```
 
 The package uses Laravel's auto-discovery feature. After installation, the package is ready to use with its default configuration.
-
-By Default `Laravel-Spy` logs all HTTP requests and API calls. You can customize it to exclude specific URLs or obfuscate sensitive data.
-
-
-## Configuration
-To customize the behavior of Laravel Spy, you can publish the configuration file:
 ```bash
 php artisan vendor:publish --provider="Farayaz\LaravelSpy\LaravelSpyServiceProvider"
 ```
 ```bash
 php artisan migrate
 ```
-This will create a `config/spy.php` file where you can configure the following options:
+
+
+## Usage
+Once installed and configured, Laravel Spy automatically tracks all outgoing HTTP requests made using Laravel's Http facade or HTTP client. The package logs the following details for each request:
+* The full URL of the request
+* The HTTP method (e.g., GET, POST, PUT)
+* Request Headers
+* Request Body
+* Response Header
+* Response Body
+* Response HTTP Status code
+
+## Example:
+After installing `laravel-spy` and publishing the configuration, any usage of Laravel's HTTP client (for example, in your controllers or jobs) will be automatically logged.
+
+Laravel Spy will log the details of this outgoing request to the `http_logs` table in your database.
+
+```php
+Http::get('https://github.com/farayaz/laravel-spy/');
+```
+
+## Configuration
+To customize Laravel Spy, publish the config file and edit `config/spy.php`.
 
 ### Basic Configuration
 
@@ -84,23 +100,13 @@ Configure how long logs should be retained before automatic cleanup via environm
 SPY_CLEAN_DAYS=7  # Keep logs for 7 days (default is 30)
 ```
 
-## Usage
-Once installed and configured, Laravel Spy automatically tracks all outgoing HTTP requests made using Laravel's Http facade or HTTP client. The package logs the following details for each request:
-* The full URL of the request
-* The HTTP method (e.g., GET, POST, PUT)
-* Request Headers
-* Request Body
-* Response Header
-* Response Body
-* Response HTTP Status code
+## Dashboard
 
-## Example:
-After installing `laravel-spy` and publishing the configuration, any usage of Laravel's HTTP client (for example, in your controllers or jobs) will be automatically logged.
+Laravel Spy includes a simple built-in dashboard at `/spy` with:
 
-Laravel Spy will log the details of this outgoing request to the `http_logs` table in your database.
-
-```php
-Http::get('https://github.com/farayaz/laravel-spy/');
+```bash
+SPY_DASHBOARD_ENABLED=true
+SPY_DASHBOARD_MIDDLEWARE=web,auth
 ```
 
 ## Cleaning up logs
@@ -152,10 +158,3 @@ Laravel Spy is open-sourced software licensed under the MIT License.
 
 ## Contact
 For questions or support, reach out via the GitHub repository or open an issue.
-
-
-
-
-
-
-
