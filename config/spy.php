@@ -1,6 +1,6 @@
 <?php
 
-if (! function_exists('spy_parse_env_array')) {
+if (!function_exists('spy_parse_env_array')) {
     function spy_parse_env_array($key, $default = '')
     {
         return array_filter(array_map('trim', explode(',', env($key, $default))));
@@ -41,7 +41,7 @@ return [
     /*
     * Number of days to retain logs before cleaning.
     */
-    'clean_days' => (int) env('SPY_CLEAN_DAYS', 30),
+    'clean_days' => (int)env('SPY_CLEAN_DAYS', 30),
 
     /*
     * Content types to exclude from request body logging.
@@ -56,4 +56,11 @@ return [
     */
     // Example: 'video/,audio/,application/pdf,application/zip,application/x-zip-compressed,application/octet-stream'
     'response_body_exclude_content_types' => spy_parse_env_array('SPY_RESPONSE_BODY_EXCLUDE_CONTENT_TYPES', ''),
+
+    // Route prefix: visit /{prefix} in the browser
+    'prefix' => env('SPY_DASHBOARD_PREFIX', 'spy'),
+
+    // Protect the dashboard with any middleware stack you want
+    // Example for auth-only: ['web', 'auth']
+    'middleware' => explode(',', env('SPY_DASHBOARD_MIDDLEWARE', 'web')),
 ];
