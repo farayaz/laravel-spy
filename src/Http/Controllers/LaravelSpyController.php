@@ -37,20 +37,20 @@ class LaravelSpyController extends Controller
             ->limit(10)
             ->get();
 
-        // Recent activity by hour (for sparkline)
-        $recentByHour = (clone $base)
+        // Recent activity by day (for sparkline)
+        $recentByDay = (clone $base)
             ->selectRaw(
                 DB::raw(
                     match (DB::getDriverName()) {
-                        'mysql' => "DATE_FORMAT(created_at, '%Y-%m-%d %H:00:00') as bucket",
-                        'pgsql' => "to_char(date_trunc('hour', created_at), 'YYYY-MM-DD HH24:00:00') as bucket",
-                        'sqlite' => "strftime('%Y-%m-%d %H:00:00', created_at) as bucket",
+                        'mysql' => "DATE_FORMAT(created_at, '%Y-%m-%d') as bucket",
+                        'pgsql' => "to_char(date_trunc('day', created_at), 'YYYY-MM-DD') as bucket",
+                        'sqlite' => "strftime('%Y-%m-%d', created_at) as bucket",
                         default => "created_at as bucket",
                     } . ", COUNT(*) as c"
                 )
             )
             ->groupBy('bucket')
-            ->orderBy('bucket')
+            ->orderByDesc('bucket')
             ->get();
 
         return view('spy::dashboard', [
@@ -62,7 +62,7 @@ class LaravelSpyController extends Controller
             'count5xx' => $count5xx,
             'count500' => $count500,
             'topFailures' => $topFailures,
-            'recentByHour' => $recentByHour,
+            'recentByDay' => $recentByDay,
         ]);
     }
 }

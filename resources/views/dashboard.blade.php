@@ -266,9 +266,12 @@
             theme: 'dark',
         },
         chart: {
-            type: 'bar',
+            type: 'line',
             height: '500px',
             background: '#141b2d'
+        },
+        stroke: {
+            curve: 'smooth',
         },
         plotOptions: {
             bar: {
@@ -277,7 +280,7 @@
         },
         series: [{
             data: [
-                    @foreach($recentByHour as $b)
+                    @foreach($recentByDay as $b)
                 {
                     x: '{{$b->bucket}}',
                     y: {{$b->c}}
