@@ -31,6 +31,15 @@ class LaravelSpyServiceProvider extends ServiceProvider
                 CleanCommand::class,
             ]);
         }
+
+        $this->loadViewsFrom(__DIR__ . '/../resources/views', 'spy');
+
+        if (config('spy.dashboard.enabled')) {
+            $this->loadRoutesFrom(__DIR__ . '/../routes/web.php');
+            $this->publishes([
+                __DIR__ . '/../resources/views' => resource_path('views/vendor/spy'),
+            ], 'spy-views');
+        }
     }
 
     /**

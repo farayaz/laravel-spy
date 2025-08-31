@@ -56,4 +56,18 @@ return [
     */
     // Example: 'video/,audio/,application/pdf,application/zip,application/x-zip-compressed,application/octet-stream'
     'response_body_exclude_content_types' => spy_parse_env_array('SPY_RESPONSE_BODY_EXCLUDE_CONTENT_TYPES', ''),
+
+    /*
+    * Dashboard settings.
+    */
+    'dashboard' => [
+        // Enable or disable the dashboard.
+        'enabled' => env('SPY_DASHBOARD_ENABLED', true),
+
+        // Route prefix for the dashboard.
+        'prefix' => env('SPY_DASHBOARD_PREFIX', 'spy'),
+
+        // Middleware(s) to apply to the dashboard routes, as a comma-separated list.
+        'middleware' => spy_parse_env_array('SPY_DASHBOARD_MIDDLEWARE', 'web'),
+    ],
 ];
