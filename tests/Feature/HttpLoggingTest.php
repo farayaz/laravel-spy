@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use Farayaz\LaravelSpy\Models\HttpLog;
+use Illuminate\Support\Facades\Context;
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
@@ -51,6 +52,24 @@ class HttpLoggingTest extends TestCase
         $log = HttpLog::first();
         $this->assertEquals(['name' => 'John', 'email' => 'john@example.com'], $log->request_body);
         $this->assertEquals(['id' => 1, 'name' => 'John'], $log->response_body);
+    }
+
+    /** @test */
+    public function it_adds_http_log_id_to_context()
+    {
+        Http::fake([
+            'https://api.example.com/users' => Http::response(['id' => 1, 'name' => 'John'], 201, ['Content-Type' => 'application/json'])
+        ]);
+
+        Http::post('https://api.example.com/users', [
+            'name' => 'John',
+            'email' => 'john@example.com'
+        ]);
+
+        $log = HttpLog::first();
+
+        $this->assertTrue(Context::has('http_log_id'));
+        $this->assertEquals(Context::get('http_log_id'), $log->id);
     }
 
     /** @test */
