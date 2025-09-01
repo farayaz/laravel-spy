@@ -10,7 +10,7 @@ return new class extends Migration {
         Schema::connection(config('spy.connection'))
             ->create(config('spy.table_name'), function (Blueprint $table) {
                 $table->id();
-                $table->string('url', 2048)->index();
+                $table->string('url')->index();
                 $table->string('method', 6)->index();
                 $table->json('request_headers')->nullable();
                 $table->json('request_body')->nullable();
