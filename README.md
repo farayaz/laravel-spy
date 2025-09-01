@@ -13,7 +13,7 @@ This package is useful for debugging, monitoring, and auditing external API call
 - Tracks all outgoing HTTP requests made via Laravel's HTTP client.
 - Logs request details, including URL, method, headers, payload, and response.
 - Configurable logging options to customize and obfuscate sensitive data.
-- Adds HttpLog ID to the application Context for use with error tracking 
+- Adds HttpLog ID to the application Context for use with error tracking. 
 
 ## Requirements
 

@@ -145,6 +145,23 @@ class HttpLoggingTest extends TestCase
     }
 
     /** @test */
+    public function it_does_not_add_http_log_id_to_context_when_disabled()
+    {
+        config(['spy.enabled' => false]);
+
+        Http::fake([
+            'https://api.example.com/users' => Http::response(['id' => 1, 'name' => 'John'], 201, ['Content-Type' => 'application/json'])
+        ]);
+
+        Http::post('https://api.example.com/users', [
+            'name' => 'John',
+            'email' => 'john@example.com'
+        ]);
+
+        $this->assertTrue(Context::missing('http_log_id'));
+    }
+
+    /** @test */
     public function it_logs_failed_requests()
     {
         Http::fake([
