@@ -4,7 +4,8 @@
 [![Total Downloads](https://img.shields.io/packagist/dt/farayaz/laravel-spy.svg?style=flat-square)](https://packagist.org/packages/farayaz/laravel-spy)
 [![License](https://img.shields.io/packagist/l/farayaz/laravel-spy.svg?style=flat-square)](https://packagist.org/packages/farayaz/laravel-spy)
 
-<img width="1304" height="1076" alt="laravel spy" src="https://github.com/user-attachments/assets/e726b47e-8f29-4fbb-82c8-bdbd12c11679" />
+<p align="center"><img width="652" height="538" alt="laravel spy" src="https://github.com/user-attachments/assets/e726b47e-8f29-4fbb-82c8-bdbd12c11679" /></p>
+
 
 **Laravel Spy** is a lightweight Laravel package designed to track and log outgoing HTTP requests made by your Laravel application.
 
