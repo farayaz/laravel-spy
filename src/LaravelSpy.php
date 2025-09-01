@@ -2,6 +2,7 @@
 
 namespace Farayaz\LaravelSpy;
 
+use Exception;
 use Farayaz\LaravelSpy\Models\HttpLog;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
@@ -42,28 +43,37 @@ class LaravelSpy
             $request->getBody()->getContents(),
             $request->getHeaderLine('Content-Type')
         );
+        try {
+            return HttpLog::create([
+                'url' => urldecode(self::obfuscate($request->getUri())),
+                'method' => $request->getMethod(),
+                'request_headers' => self::obfuscate($request->getHeaders()),
+                'request_body' => self::obfuscate($requestBody),
+            ]);
+        } catch (Exception $e) {
+            report($e); // silence is golden
 
-        return HttpLog::create([
-            'url' => urldecode(self::obfuscate($request->getUri())),
-            'method' => $request->getMethod(),
-            'request_headers' => self::obfuscate($request->getHeaders()),
-            'request_body' => self::obfuscate($requestBody),
-        ]);
+            return null;
+        }
     }
 
     protected static function handleResponse(ResponseInterface $response, ?HttpLog $httpLog): ResponseInterface
     {
         if ($httpLog) {
-            $responseBody = self::parseContent(
-                'response',
-                $response->getBody(),
-                $response->getHeaderLine('Content-Type')
-            );
-            $httpLog->update([
-                'status' => $response->getStatusCode(),
-                'response_body' => self::obfuscate($responseBody),
-                'response_headers' => self::obfuscate($response->getHeaders()),
-            ]);
+            try {
+                $responseBody = self::parseContent(
+                    'response',
+                    $response->getBody(),
+                    $response->getHeaderLine('Content-Type')
+                );
+                $httpLog->update([
+                    'status' => $response->getStatusCode(),
+                    'response_body' => self::obfuscate($responseBody),
+                    'response_headers' => self::obfuscate($response->getHeaders()),
+                ]);
+            } catch (Exception $e) {
+                report($e); // silence is golden
+            }
         }
 
         return $response;
@@ -72,10 +82,14 @@ class LaravelSpy
     protected static function handleException(\Exception $exception, ?HttpLog $httpLog): void
     {
         if ($httpLog) {
-            $httpLog->update([
-                'status' => 0,
-                'response_body' => $exception->getMessage(),
-            ]);
+            try {
+                $httpLog->update([
+                    'status' => 0,
+                    'response_body' => $exception->getMessage(),
+                ]);
+            } catch (Exception $e) {
+                report($e); // silence is golden
+            }
         }
 
         throw $exception;
