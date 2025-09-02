@@ -4,6 +4,7 @@ namespace Farayaz\LaravelSpy;
 
 use Exception;
 use Farayaz\LaravelSpy\Models\HttpLog;
+use Illuminate\Log\Context\Repository as LaravelContext;
 use Illuminate\Support\Facades\Context;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
@@ -22,7 +23,7 @@ class LaravelSpy
 
                 $httpLog = self::shouldLog($request) ? self::handleRequest($request) : null;
 
-                if ($httpLog) {
+                if ($httpLog && class_exists(LaravelContext::class)) {
                     Context::add('http_log_id', $httpLog->getKey());
                 }
 
