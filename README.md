@@ -1,11 +1,20 @@
+<p align="center">
+    <img src="./laravel-spy.svg" alt="Laravel Spy Logo" width="300" height="300" />
+</p>
+
+<p align="center">
+    <a href="https://packagist.org/packages/farayaz/laravel-spy">
+        <img src="https://img.shields.io/packagist/v/farayaz/laravel-spy.svg?style=flat-square" alt="Latest Version on Packagist" />
+    </a>
+    <a href="https://packagist.org/packages/farayaz/laravel-spy">
+        <img src="https://img.shields.io/packagist/dt/farayaz/laravel-spy.svg?style=flat-square" alt="Total Downloads" />
+    </a>
+    <a href="https://packagist.org/packages/farayaz/laravel-spy">
+        <img src="https://img.shields.io/packagist/l/farayaz/laravel-spy.svg?style=flat-square" alt="License" />
+    </a>
+</p>
+
 # Laravel Spy
-
-[![Latest Version on Packagist](https://img.shields.io/packagist/v/farayaz/laravel-spy.svg?style=flat-square)](https://packagist.org/packages/farayaz/laravel-spy)
-[![Total Downloads](https://img.shields.io/packagist/dt/farayaz/laravel-spy.svg?style=flat-square)](https://packagist.org/packages/farayaz/laravel-spy)
-[![License](https://img.shields.io/packagist/l/farayaz/laravel-spy.svg?style=flat-square)](https://packagist.org/packages/farayaz/laravel-spy)
-
-<p align="center"><img width="652" height="538" alt="laravel spy" src="https://github.com/user-attachments/assets/e726b47e-8f29-4fbb-82c8-bdbd12c11679" /></p>
-
 
 **Laravel Spy** is a lightweight Laravel package designed to track and log outgoing HTTP requests made by your Laravel application.
 
