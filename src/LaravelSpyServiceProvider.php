@@ -34,7 +34,7 @@ class LaravelSpyServiceProvider extends ServiceProvider
 
         $this->loadViewsFrom(__DIR__ . '/../resources/views', 'spy');
 
-        if (config('spy.dashboard.enabled')) {
+        if (config('spy.dashboard.enabled') && Gate::allows('viewSpy')) {
             $this->loadRoutesFrom(__DIR__ . '/../routes/web.php');
             $this->publishes([
                 __DIR__ . '/../resources/views' => resource_path('views/vendor/spy'),
