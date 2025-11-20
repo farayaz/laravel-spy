@@ -62,7 +62,7 @@ return [
     */
     'dashboard' => [
         // Enable or disable the dashboard.
-        'enabled' => env('SPY_DASHBOARD_ENABLED', true),
+        'enabled' => env('SPY_DASHBOARD_ENABLED', false),
 
         // Route prefix for the dashboard.
         'prefix' => env('SPY_DASHBOARD_PREFIX', 'spy'),
