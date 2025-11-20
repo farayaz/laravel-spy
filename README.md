@@ -104,6 +104,15 @@ SPY_REQUEST_BODY_EXCLUDE_CONTENT_TYPES=image/
 SPY_RESPONSE_BODY_EXCLUDE_CONTENT_TYPES=video/,application/pdf
 ```
 
+### Field Length and Row Limits
+
+Control field length and row limits:
+
+```bash
+SPY_FIELD_MAX_LENGTH=10000  # Maximum characters per field (default: 10000)
+SPY_FIELD_MAX_ROWS=10000    # Maximum number of log entries to retain (default: 10000)
+```
+
 ### Automatic Log Retention
 
 Configure how long logs should be retained before automatic cleanup via environment variable:
