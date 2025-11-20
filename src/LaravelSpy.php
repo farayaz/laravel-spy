@@ -4,6 +4,7 @@ namespace Farayaz\LaravelSpy;
 
 use Exception;
 use Farayaz\LaravelSpy\Models\HttpLog;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use Psr\Http\Message\RequestInterface;
@@ -144,8 +145,15 @@ class LaravelSpy
     {
         $mask = config('spy.obfuscation_mask');
         $obfuscates = config('spy.obfuscates', []);
+        $fieldMaxLength = config('spy.field_max_length', 10000);
+        $fieldMaxRows = config('spy.field_max_rows', 1000);
 
         if (is_array($data)) {
+            if ($fieldMaxRows && count($data) > $fieldMaxRows) {
+                $data = Arr::take($data, $fieldMaxRows);
+                $data['_spy_truncated'] = true;
+            }
+
             foreach ($data as $k => &$v) {
                 foreach ($obfuscates as $key) {
                     if (strcasecmp($k, $key) === 0) {
@@ -158,12 +166,15 @@ class LaravelSpy
                         }
                     }
                 }
+
                 if (is_array($v)) {
                     $v = self::obfuscate($v);
+                } elseif (is_string($v)) {
+                    $v = Str::limit($v, $fieldMaxLength);
                 }
             }
         } elseif (is_string($data)) {
-            $data = str_replace($obfuscates, $mask, $data);
+            $data = Str::limit(str_replace($obfuscates, $mask, $data), $fieldMaxLength);
         } elseif ($data instanceof \GuzzleHttp\Psr7\Uri) {
             parse_str($data->getQuery(), $query);
 

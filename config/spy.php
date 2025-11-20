@@ -58,6 +58,18 @@ return [
     'response_body_exclude_content_types' => spy_parse_env_array('SPY_RESPONSE_BODY_EXCLUDE_CONTENT_TYPES', ''),
 
     /*
+    * Maximum length (in characters) for field values in logs.
+    * Values exceeding this limit will be truncated.
+    */
+    'field_max_length' => (int) env('SPY_FIELD_MAX_LENGTH', 10000),
+
+    /*
+    * Maximum number of rows to log for array/collection fields.
+    * Arrays exceeding this limit will be truncated.
+    */
+    'field_max_rows' => (int) env('SPY_FIELD_MAX_ROWS', 10000),
+
+    /*
     * Dashboard settings.
     */
     'dashboard' => [
