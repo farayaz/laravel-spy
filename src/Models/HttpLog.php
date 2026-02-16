@@ -17,6 +17,7 @@ class HttpLog extends Model
         'request_headers',
         'request_body',
         'status',
+        'duration_ms',
         'response_body',
         'response_headers',
     ];
@@ -24,6 +25,7 @@ class HttpLog extends Model
     protected $casts = [
         'request_headers' => 'json',
         'request_body' => 'json',
+        'duration_ms' => 'integer',
         'response_body' => 'json',
         'response_headers' => 'json',
     ];

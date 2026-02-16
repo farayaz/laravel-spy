@@ -21,11 +21,17 @@ class LaravelSpyServiceProvider extends ServiceProvider
                 __DIR__ . '/../config/spy.php' => config_path('spy.php'),
             ], 'config');
 
-            $migrationName = 'create_spy_http_logs_table.php';
-            $targetPath = $this->getMigrationFileName($migrationName);
-            $this->publishes([
-                __DIR__ . '/../database/migrations/' . $migrationName . '.stub' => $targetPath,
-            ], 'migrations');
+            $migrationNames = [
+                'create_spy_http_logs_table.php',
+                'add_duration_ms_to_spy_http_logs_table.php',
+            ];
+            $migrationPaths = [];
+
+            foreach ($migrationNames as $migrationName) {
+                $migrationPaths[__DIR__ . '/../database/migrations/' . $migrationName . '.stub'] = $this->getMigrationFileName($migrationName);
+            }
+
+            $this->publishes($migrationPaths, 'migrations');
 
             $this->commands([
                 CleanCommand::class,

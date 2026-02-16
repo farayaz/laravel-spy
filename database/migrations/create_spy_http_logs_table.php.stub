@@ -15,6 +15,7 @@ return new class extends Migration {
                 $table->json('request_headers')->nullable();
                 $table->json('request_body')->nullable();
                 $table->unsignedSmallInteger('status')->nullable()->index();
+                $table->unsignedInteger('duration_ms')->nullable()->index();
                 $table->json('response_body')->nullable();
                 $table->json('response_headers')->nullable();
                 $table->timestamps();

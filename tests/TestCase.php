@@ -49,6 +49,7 @@ abstract class TestCase extends OrchestraTestCase
             $table->json('request_headers')->nullable();
             $table->json('request_body')->nullable();
             $table->integer('status')->nullable();
+            $table->integer('duration_ms')->nullable();
             $table->json('response_body')->nullable();
             $table->json('response_headers')->nullable();
             $table->timestamps();
