@@ -60,6 +60,7 @@ Once installed and configured, Laravel Spy automatically tracks all outgoing HTT
 * Response Header
 * Response Body
 * Response HTTP Status code
+* Request duration (milliseconds)
 
 ## Example:
 After installing `laravel-spy` and publishing the configuration, any usage of Laravel's HTTP client (for example, in your controllers or jobs) will be automatically logged.

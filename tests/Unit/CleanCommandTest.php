@@ -31,11 +31,11 @@ class CleanCommandTest extends TestCase
             ->assertExitCode(0);
 
         $this->assertDatabaseMissing('http_logs', [
-            'url' => 'https://api.example.com/old'
+            'url' => 'https://api.example.com/old',
         ]);
 
         $this->assertDatabaseHas('http_logs', [
-            'url' => 'https://api.example.com/recent'
+            'url' => 'https://api.example.com/recent',
         ]);
     }
 
@@ -69,15 +69,15 @@ class CleanCommandTest extends TestCase
             ->assertExitCode(0);
 
         $this->assertDatabaseMissing('http_logs', [
-            'url' => 'https://api.example.com/users/1'
+            'url' => 'https://api.example.com/users/1',
         ]);
 
         $this->assertDatabaseHas('http_logs', [
-            'url' => 'https://api.example.com/users/2'
+            'url' => 'https://api.example.com/users/2',
         ]);
 
         $this->assertDatabaseHas('http_logs', [
-            'url' => 'https://api.example.com/orders/1'
+            'url' => 'https://api.example.com/orders/1',
         ]);
     }
 
@@ -98,7 +98,7 @@ class CleanCommandTest extends TestCase
             ->assertExitCode(0);
 
         $this->assertDatabaseMissing('http_logs', [
-            'url' => 'https://api.example.com/test'
+            'url' => 'https://api.example.com/test',
         ]);
     }
 
@@ -116,7 +116,7 @@ class CleanCommandTest extends TestCase
             ->assertExitCode(0);
 
         $this->assertDatabaseHas('http_logs', [
-            'url' => 'https://api.example.com/recent'
+            'url' => 'https://api.example.com/recent',
         ]);
     }
 
@@ -137,7 +137,7 @@ class CleanCommandTest extends TestCase
             ->assertExitCode(0);
 
         $this->assertDatabaseHas('http_logs', [
-            'url' => 'https://api.example.com/test'
+            'url' => 'https://api.example.com/test',
         ]);
     }
 }

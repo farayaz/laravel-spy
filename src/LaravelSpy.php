@@ -20,13 +20,14 @@ class LaravelSpy
                     return $handler($request, $options);
                 }
 
+                $startedAt = microtime(true);
                 $httpLog = self::shouldLog($request) ? self::handleRequest($request) : null;
 
                 $responsePromise = $handler($request, $options);
 
                 return $responsePromise->then(
-                    fn (ResponseInterface $response) => self::handleResponse($response, $httpLog),
-                    fn (\Exception $e) => self::handleException($e, $httpLog)
+                    fn (ResponseInterface $response) => self::handleResponse($response, $httpLog, $startedAt),
+                    fn (\Exception $e) => self::handleException($e, $httpLog, $startedAt)
                 );
             };
         });
@@ -58,7 +59,7 @@ class LaravelSpy
         }
     }
 
-    protected static function handleResponse(ResponseInterface $response, ?HttpLog $httpLog): ResponseInterface
+    protected static function handleResponse(ResponseInterface $response, ?HttpLog $httpLog, float $startedAt): ResponseInterface
     {
         if ($httpLog) {
             try {
@@ -69,6 +70,7 @@ class LaravelSpy
                 );
                 $httpLog->update([
                     'status' => $response->getStatusCode(),
+                    'duration_ms' => self::calculateDurationMs($startedAt),
                     'response_body' => self::obfuscate($responseBody),
                     'response_headers' => self::obfuscate($response->getHeaders()),
                 ]);
@@ -80,12 +82,13 @@ class LaravelSpy
         return $response;
     }
 
-    protected static function handleException(\Exception $exception, ?HttpLog $httpLog): void
+    protected static function handleException(\Exception $exception, ?HttpLog $httpLog, float $startedAt): void
     {
         if ($httpLog) {
             try {
                 $httpLog->update([
                     'status' => 0,
+                    'duration_ms' => self::calculateDurationMs($startedAt),
                     'response_body' => $exception->getMessage(),
                 ]);
             } catch (Exception $e) {
@@ -94,6 +97,11 @@ class LaravelSpy
         }
 
         throw $exception;
+    }
+
+    protected static function calculateDurationMs(float $startedAt): int
+    {
+        return max(0, (int) round((microtime(true) - $startedAt) * 1000));
     }
 
     public static function parseContent(string $context, mixed $content, ?string $contentType = null): mixed

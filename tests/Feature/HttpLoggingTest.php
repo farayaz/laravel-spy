@@ -12,7 +12,7 @@ class HttpLoggingTest extends TestCase
     public function it_logs_successful_http_requests()
     {
         Http::fake([
-            'https://api.example.com/users' => Http::response(['users' => []], 200, ['Content-Type' => 'application/json'])
+            'https://api.example.com/users' => Http::response(['users' => []], 200, ['Content-Type' => 'application/json']),
         ]);
 
         Http::get('https://api.example.com/users');
@@ -27,6 +27,8 @@ class HttpLoggingTest extends TestCase
         $this->assertEquals('https://api.example.com/users', $log->url);
         $this->assertEquals('GET', $log->method);
         $this->assertEquals(200, $log->status);
+        $this->assertIsInt($log->duration_ms);
+        $this->assertGreaterThanOrEqual(0, $log->duration_ms);
         $this->assertEquals(['users' => []], $log->response_body);
     }
 
@@ -34,12 +36,12 @@ class HttpLoggingTest extends TestCase
     public function it_logs_post_requests_with_body()
     {
         Http::fake([
-            'https://api.example.com/users' => Http::response(['id' => 1, 'name' => 'John'], 201, ['Content-Type' => 'application/json'])
+            'https://api.example.com/users' => Http::response(['id' => 1, 'name' => 'John'], 201, ['Content-Type' => 'application/json']),
         ]);
 
         Http::post('https://api.example.com/users', [
             'name' => 'John',
-            'email' => 'john@example.com'
+            'email' => 'john@example.com',
         ]);
 
         $this->assertDatabaseHas('http_logs', [
@@ -57,12 +59,12 @@ class HttpLoggingTest extends TestCase
     public function it_logs_requests_with_headers()
     {
         Http::fake([
-            'https://api.example.com/users' => Http::response(['data' => 'success'], 200)
+            'https://api.example.com/users' => Http::response(['data' => 'success'], 200),
         ]);
 
         Http::withHeaders([
             'Authorization' => 'Bearer token123',
-            'Content-Type' => 'application/json'
+            'Content-Type' => 'application/json',
         ])->get('https://api.example.com/users');
 
         $log = HttpLog::first();
@@ -74,12 +76,12 @@ class HttpLoggingTest extends TestCase
     public function it_obfuscates_sensitive_data_in_request_body()
     {
         Http::fake([
-            'https://api.example.com/login' => Http::response(['token' => 'abc123'], 200)
+            'https://api.example.com/login' => Http::response(['token' => 'abc123'], 200),
         ]);
 
         Http::post('https://api.example.com/login', [
             'username' => 'john',
-            'password' => 'secret123'
+            'password' => 'secret123',
         ]);
 
         $log = HttpLog::first();
@@ -94,18 +96,18 @@ class HttpLoggingTest extends TestCase
 
         Http::fake([
             'https://api.example.com/health-check' => Http::response(['status' => 'ok'], 200),
-            'https://api.example.com/users' => Http::response(['users' => []], 200)
+            'https://api.example.com/users' => Http::response(['users' => []], 200),
         ]);
 
         Http::get('https://api.example.com/health-check');
         Http::get('https://api.example.com/users');
 
         $this->assertDatabaseMissing('http_logs', [
-            'url' => 'https://api.example.com/health-check'
+            'url' => 'https://api.example.com/health-check',
         ]);
 
         $this->assertDatabaseHas('http_logs', [
-            'url' => 'https://api.example.com/users'
+            'url' => 'https://api.example.com/users',
         ]);
     }
 
@@ -115,13 +117,13 @@ class HttpLoggingTest extends TestCase
         config(['spy.enabled' => false]);
 
         Http::fake([
-            'https://api.example.com/users' => Http::response(['users' => []], 200)
+            'https://api.example.com/users' => Http::response(['users' => []], 200),
         ]);
 
         Http::get('https://api.example.com/users');
 
         $this->assertDatabaseMissing('http_logs', [
-            'url' => 'https://api.example.com/users'
+            'url' => 'https://api.example.com/users',
         ]);
     }
 
@@ -129,7 +131,7 @@ class HttpLoggingTest extends TestCase
     public function it_logs_failed_requests()
     {
         Http::fake([
-            'https://api.example.com/users' => Http::response(['error' => 'Not found'], 404)
+            'https://api.example.com/users' => Http::response(['error' => 'Not found'], 404),
         ]);
 
         Http::get('https://api.example.com/users');
@@ -141,6 +143,8 @@ class HttpLoggingTest extends TestCase
         ]);
 
         $log = HttpLog::first();
+        $this->assertIsInt($log->duration_ms);
+        $this->assertGreaterThanOrEqual(0, $log->duration_ms);
         $this->assertEquals(['error' => 'Not found'], $log->response_body);
     }
 
@@ -148,7 +152,7 @@ class HttpLoggingTest extends TestCase
     public function it_logs_requests_with_different_http_methods()
     {
         Http::fake([
-            'https://api.example.com/users/*' => Http::response(['success' => true], 200)
+            'https://api.example.com/users/*' => Http::response(['success' => true], 200),
         ]);
 
         Http::put('https://api.example.com/users/1', ['name' => 'Updated']);
@@ -166,8 +170,8 @@ class HttpLoggingTest extends TestCase
         Http::fake([
             'https://api.example.com/users' => Http::response(['data' => 'test'], 200, [
                 'Content-Type' => 'application/json',
-                'X-Rate-Limit' => '100'
-            ])
+                'X-Rate-Limit' => '100',
+            ]),
         ]);
 
         Http::get('https://api.example.com/users');

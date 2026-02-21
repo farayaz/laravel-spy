@@ -16,6 +16,7 @@ class HttpLogModelTest extends TestCase
             'request_headers' => ['Content-Type' => 'application/json'],
             'request_body' => ['name' => 'John'],
             'status' => 200,
+            'duration_ms' => 123,
             'response_body' => ['id' => 1, 'name' => 'John'],
             'response_headers' => ['Content-Type' => 'application/json'],
         ]);
@@ -24,6 +25,7 @@ class HttpLogModelTest extends TestCase
         $this->assertEquals('https://api.example.com/users', $httpLog->url);
         $this->assertEquals('GET', $httpLog->method);
         $this->assertEquals(200, $httpLog->status);
+        $this->assertEquals(123, $httpLog->duration_ms);
     }
 
     /** @test */
@@ -35,6 +37,7 @@ class HttpLogModelTest extends TestCase
             'request_headers' => ['Content-Type' => 'application/json'],
             'request_body' => ['name' => 'John', 'email' => 'john@example.com'],
             'status' => 201,
+            'duration_ms' => 250,
             'response_body' => ['id' => 1, 'name' => 'John', 'email' => 'john@example.com'],
             'response_headers' => ['Content-Type' => 'application/json'],
         ]);
@@ -43,6 +46,7 @@ class HttpLogModelTest extends TestCase
         $this->assertIsArray($httpLog->request_body);
         $this->assertIsArray($httpLog->response_body);
         $this->assertIsArray($httpLog->response_headers);
+        $this->assertIsInt($httpLog->duration_ms);
 
         $this->assertEquals(['Content-Type' => 'application/json'], $httpLog->request_headers);
         $this->assertEquals(['name' => 'John', 'email' => 'john@example.com'], $httpLog->request_body);
@@ -53,22 +57,23 @@ class HttpLogModelTest extends TestCase
     /** @test */
     public function it_uses_configured_table_name()
     {
-        $httpLog = new HttpLog();
-        
+        $httpLog = new HttpLog;
+
         $this->assertEquals('http_logs', $httpLog->getTable());
     }
 
     /** @test */
     public function it_has_fillable_attributes()
     {
-        $httpLog = new HttpLog();
-        
+        $httpLog = new HttpLog;
+
         $expectedFillable = [
             'url',
             'method',
             'request_headers',
             'request_body',
             'status',
+            'duration_ms',
             'response_body',
             'response_headers',
         ];
@@ -88,11 +93,13 @@ class HttpLogModelTest extends TestCase
 
         $httpLog->update([
             'status' => 200,
+            'duration_ms' => 10,
             'response_body' => ['users' => []],
             'response_headers' => ['Content-Type' => 'application/json'],
         ]);
 
         $this->assertEquals(200, $httpLog->status);
+        $this->assertEquals(10, $httpLog->duration_ms);
         $this->assertEquals(['users' => []], $httpLog->response_body);
         $this->assertEquals(['Content-Type' => 'application/json'], $httpLog->response_headers);
     }
