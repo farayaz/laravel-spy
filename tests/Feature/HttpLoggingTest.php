@@ -143,6 +143,8 @@ class HttpLoggingTest extends TestCase
         ]);
 
         $log = HttpLog::first();
+        $this->assertIsInt($log->duration_ms);
+        $this->assertGreaterThanOrEqual(0, $log->duration_ms);
         $this->assertEquals(['error' => 'Not found'], $log->response_body);
     }
 
