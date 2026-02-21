@@ -3,6 +3,7 @@
 namespace Farayaz\LaravelSpy;
 
 use Farayaz\LaravelSpy\Commands\CleanCommand;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\ServiceProvider;
 
 class LaravelSpyServiceProvider extends ServiceProvider
@@ -26,9 +27,9 @@ class LaravelSpyServiceProvider extends ServiceProvider
                 'add_duration_ms_to_spy_http_logs_table.php',
             ];
             $migrationPaths = [];
-
+            $time = now();
             foreach ($migrationNames as $migrationName) {
-                $migrationPaths[__DIR__ . '/../database/migrations/' . $migrationName . '.stub'] = $this->getMigrationFileName($migrationName);
+                $migrationPaths[__DIR__ . '/../database/migrations/' . $migrationName . '.stub'] = $this->getMigrationFileName($migrationName, $time->addSecond());
             }
 
             $this->publishes($migrationPaths, 'migrations');
@@ -58,12 +59,12 @@ class LaravelSpyServiceProvider extends ServiceProvider
         $this->mergeConfigFrom(__DIR__ . '/../config/spy.php', 'spy');
     }
 
-    protected function getMigrationFileName(string $file): string
+    protected function getMigrationFileName(string $file, Carbon $time): string
     {
         foreach (glob(database_path('migrations/*_' . $file)) as $existing) {
             return $existing;
         }
 
-        return database_path('migrations/' . date('Y_m_d_His') . '_' . $file);
+        return database_path('migrations/' . $time->format('Y_m_d_His') . '_' . $file);
     }
 }
