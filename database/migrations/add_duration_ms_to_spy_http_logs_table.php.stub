@@ -8,8 +8,7 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::connection(config('spy.connection'))
-            ->table(config('spy.table_name'), function (Blueprint
-            $table) {
+            ->table(config('spy.table_name'), function (Blueprint $table) {
                 $table->unsignedInteger('duration_ms')->nullable()->after('status')->index();
             });
     }
