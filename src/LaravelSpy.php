@@ -4,6 +4,7 @@ namespace Farayaz\LaravelSpy;
 
 use Exception;
 use Farayaz\LaravelSpy\Models\HttpLog;
+use GuzzleHttp\Psr7\Uri;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
@@ -27,7 +28,7 @@ class LaravelSpy
 
                 return $responsePromise->then(
                     fn (ResponseInterface $response) => self::handleResponse($response, $httpLog, $startedAt),
-                    fn (\Exception $e) => self::handleException($e, $httpLog, $startedAt)
+                    fn (Exception $e) => self::handleException($e, $httpLog, $startedAt)
                 );
             };
         });
@@ -82,7 +83,7 @@ class LaravelSpy
         return $response;
     }
 
-    protected static function handleException(\Exception $exception, ?HttpLog $httpLog, float $startedAt): void
+    protected static function handleException(Exception $exception, ?HttpLog $httpLog, float $startedAt): void
     {
         if ($httpLog) {
             try {
@@ -183,7 +184,7 @@ class LaravelSpy
             }
         } elseif (is_string($data)) {
             $data = Str::limit(str_replace($obfuscates, $mask, $data), $fieldMaxLength);
-        } elseif ($data instanceof \GuzzleHttp\Psr7\Uri) {
+        } elseif ($data instanceof Uri) {
             parse_str($data->getQuery(), $query);
 
             return $data->withQuery(http_build_query(self::obfuscate($query)));
