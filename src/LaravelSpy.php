@@ -5,7 +5,6 @@ namespace Farayaz\LaravelSpy;
 use Exception;
 use Farayaz\LaravelSpy\Models\HttpLog;
 use GuzzleHttp\Psr7\Uri;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use Psr\Http\Message\RequestInterface;
@@ -159,7 +158,7 @@ class LaravelSpy
 
         if (is_array($data)) {
             if ($fieldMaxRows && count($data) > $fieldMaxRows) {
-                $data = Arr::take($data, $fieldMaxRows);
+                $data = array_slice($data, 0, $fieldMaxRows, true);
                 $data['_spy_truncated'] = true;
             }
 
