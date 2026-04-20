@@ -1,6 +1,6 @@
 .idea
 vendor
 composer.lock
-+.phpunit.result.cache
+.phpunit.result.cache
 .phpunit.cache
 .composer

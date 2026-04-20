@@ -29,10 +29,10 @@ This package is useful for debugging, monitoring, and auditing external API call
 ## Requirements
 
 - **PHP**: ^8.1
-- **Laravel**: ^10.0 | ^11.0 | ^12.0
+- **Laravel**: ^10.0 | ^11.0 | ^12.0 | ^13.0
 - **Development Dependencies** (optional):
   - `laravel/pint`: ^1.0 (for code style linting)
-  - `phpunit/phpunit`: ^9.0 (for running tests)
+  - `phpunit/phpunit`: ^9.0 | ^10.0 | ^11.0 (for running tests)
 
 ## Installation
 

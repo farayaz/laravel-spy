@@ -24,7 +24,7 @@ tests/
 
 ### Files Created
 
-- `Dockerfile` - PHP 8.2 CLI environment with all required extensions
+- `Dockerfile` - PHP CLI environment with all required extensions
 - `docker-compose.yml` - Docker Compose configuration
 - `.dockerignore` - Optimizes Docker build by excluding unnecessary files
 - `run-tests.sh` - Convenient script to run tests in Docker
@@ -92,16 +92,16 @@ The test suite uses:
 - **SQLite in-memory database** for fast, isolated tests
 - **Orchestra Testbench** for Laravel package testing
 - **HTTP faking** for testing HTTP requests without external calls
-- **PHPUnit 10.x** with comprehensive assertions
+- **PHPUnit** with comprehensive assertions
 
 ## Dependencies Added
 
 ```json
 {
-  "require-dev": {
-    "phpunit/phpunit": "^9.0|^10.0",
+    "require-dev": {
+    "phpunit/phpunit": "^9.0|^10.0|^11.0",
     "laravel/pint": "^1.0",
-    "orchestra/testbench": "^8.0|^9.0",
+    "orchestra/testbench": "^8.0|^9.0|^10.0|^11.0",
     "mockery/mockery": "^1.4.4",
     "fakerphp/faker": "^1.9.1"
   }
