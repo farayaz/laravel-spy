@@ -2,19 +2,26 @@
 
 namespace Farayaz\LaravelSpy;
 
-use Exception;
 use Farayaz\LaravelSpy\Models\HttpLog;
+use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Uri;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\StreamInterface;
+use Throwable;
 
 class LaravelSpy
 {
     public static function boot(): void
     {
-        Http::globalMiddleware(static function (callable $handler): callable {
+        Http::globalMiddleware(self::guzzleMiddleware());
+    }
+
+    public static function guzzleMiddleware(): callable
+    {
+        return static function (callable $handler): callable {
             return static function (RequestInterface $request, array $options) use ($handler) {
                 if (! config('spy.enabled')) {
                     return $handler($request, $options);
@@ -23,14 +30,19 @@ class LaravelSpy
                 $startedAt = microtime(true);
                 $httpLog = self::shouldLog($request) ? self::handleRequest($request) : null;
 
-                $responsePromise = $handler($request, $options);
-
-                return $responsePromise->then(
+                return $handler($request, $options)->then(
                     fn (ResponseInterface $response) => self::handleResponse($response, $httpLog, $startedAt),
-                    fn (Exception $e) => self::handleException($e, $httpLog, $startedAt)
+                    fn (Throwable $exception) => self::handleException($exception, $httpLog, $startedAt)
                 );
             };
-        });
+        };
+    }
+
+    public static function pushToHandlerStack(HandlerStack $stack): HandlerStack
+    {
+        $stack->push(self::guzzleMiddleware(), 'laravel-spy');
+
+        return $stack;
     }
 
     protected static function shouldLog(RequestInterface $request): bool
@@ -42,7 +54,7 @@ class LaravelSpy
     {
         $requestBody = self::parseContent(
             'request',
-            $request->getBody()->getContents(),
+            self::readStreamContent($request->getBody()),
             $request->getHeaderLine('Content-Type')
         );
         try {
@@ -52,7 +64,7 @@ class LaravelSpy
                 'request_headers' => self::obfuscate($request->getHeaders()),
                 'request_body' => self::obfuscate($requestBody),
             ]);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             report($e); // silence is golden
 
             return null;
@@ -74,7 +86,7 @@ class LaravelSpy
                     'response_body' => self::obfuscate($responseBody),
                     'response_headers' => self::obfuscate($response->getHeaders()),
                 ]);
-            } catch (Exception $e) {
+            } catch (Throwable $e) {
                 report($e); // silence is golden
             }
         }
@@ -82,7 +94,7 @@ class LaravelSpy
         return $response;
     }
 
-    protected static function handleException(Exception $exception, ?HttpLog $httpLog, float $startedAt): void
+    protected static function handleException(Throwable $exception, ?HttpLog $httpLog, float $startedAt): void
     {
         if ($httpLog) {
             try {
@@ -91,7 +103,7 @@ class LaravelSpy
                     'duration_ms' => self::calculateDurationMs($startedAt),
                     'response_body' => $exception->getMessage(),
                 ]);
-            } catch (Exception $e) {
+            } catch (Throwable $e) {
                 report($e); // silence is golden
             }
         }
@@ -102,6 +114,20 @@ class LaravelSpy
     protected static function calculateDurationMs(float $startedAt): int
     {
         return max(0, (int) round((microtime(true) - $startedAt) * 1000));
+    }
+
+    protected static function readStreamContent(StreamInterface $stream): string
+    {
+        if (! $stream->isSeekable()) {
+            return $stream->getContents();
+        }
+
+        $position = $stream->tell();
+        $stream->rewind();
+        $content = $stream->getContents();
+        $stream->seek($position);
+
+        return $content;
     }
 
     public static function parseContent(string $context, mixed $content, ?string $contentType = null): mixed
