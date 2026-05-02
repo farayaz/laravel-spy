@@ -71,6 +71,27 @@ Laravel Spy will log the details of this outgoing request to the `http_logs` tab
 Http::get('https://github.com/farayaz/laravel-spy/');
 ```
 
+### Guzzle client support
+
+For standalone Guzzle clients, attach Laravel Spy middleware to your `HandlerStack` explicitly:
+
+```php
+use Farayaz\LaravelSpy\LaravelSpy;
+use GuzzleHttp\Client;
+use GuzzleHttp\HandlerStack;
+
+$stack = HandlerStack::create();
+LaravelSpy::pushToHandlerStack($stack);
+
+$client = new Client([
+    'handler' => $stack,
+]);
+
+$client->get('https://api.example.com/users');
+```
+
+If you prefer the raw middleware callable, use `LaravelSpy::guzzleMiddleware()` and push it to the stack yourself.
+
 ## Configuration
 To customize Laravel Spy, publish the config file and edit `config/spy.php`.
 
