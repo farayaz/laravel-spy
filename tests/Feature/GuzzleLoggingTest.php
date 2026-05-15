@@ -7,7 +7,6 @@ use Farayaz\LaravelSpy\Models\HttpLog;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Handler\MockHandler;
-use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
 use Tests\TestCase;
@@ -105,15 +104,12 @@ class GuzzleLoggingTest extends TestCase
     }
 
     /** @test */
-    public function it_pushes_guzzle_middleware_to_a_custom_handler_stack()
+    public function it_builds_a_handler_stack_with_spy_middleware()
     {
-        $stack = HandlerStack::create(new MockHandler([
+        $stack = LaravelSpy::handlerStack();
+        $stack->setHandler(new MockHandler([
             new Response(200, ['Content-Type' => 'application/json'], json_encode(['ok' => true])),
         ]));
-
-        $returnedStack = LaravelSpy::pushToHandlerStack($stack);
-
-        $this->assertSame($stack, $returnedStack);
 
         $client = new Client(['handler' => $stack]);
         $client->get('https://api.example.com/custom');
@@ -124,13 +120,36 @@ class GuzzleLoggingTest extends TestCase
         ]);
     }
 
+    /** @test */
+    public function it_resolves_guzzle_client_from_container_with_spy_middleware()
+    {
+        $client = app(Client::class);
+
+        $this->assertInstanceOf(Client::class, $client);
+        $this->assertStringContainsString('laravel-spy', (string) $client->getConfig('handler'));
+    }
+
+    /** @test */
+    public function it_does_not_log_for_plain_guzzle_clients_without_spy_handler_stack()
+    {
+        $client = new Client([
+            'handler' => new MockHandler([
+                new Response(200, ['Content-Type' => 'application/json'], json_encode(['ok' => true])),
+            ]),
+        ]);
+
+        $client->get('https://api.example.com/plain');
+
+        $this->assertDatabaseCount('http_logs', 0);
+    }
+
     /**
      * @param  array<int, mixed>  $queue
      */
     protected function makeClient(array $queue): Client
     {
-        $stack = HandlerStack::create(new MockHandler($queue));
-        LaravelSpy::pushToHandlerStack($stack);
+        $stack = LaravelSpy::handlerStack();
+        $stack->setHandler(new MockHandler($queue));
 
         return new Client(['handler' => $stack]);
     }

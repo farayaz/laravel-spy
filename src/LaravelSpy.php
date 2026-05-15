@@ -16,10 +16,10 @@ class LaravelSpy
 {
     public static function boot(): void
     {
-        Http::globalMiddleware(self::guzzleMiddleware());
+        Http::globalMiddleware(self::middleware());
     }
 
-    public static function guzzleMiddleware(): callable
+    public static function middleware(): callable
     {
         return static function (callable $handler): callable {
             return static function (RequestInterface $request, array $options) use ($handler) {
@@ -38,9 +38,10 @@ class LaravelSpy
         };
     }
 
-    public static function pushToHandlerStack(HandlerStack $stack): HandlerStack
+    public static function handlerStack(): HandlerStack
     {
-        $stack->push(self::guzzleMiddleware(), 'laravel-spy');
+        $stack = HandlerStack::create();
+        $stack->push(self::middleware(), 'laravel-spy');
 
         return $stack;
     }

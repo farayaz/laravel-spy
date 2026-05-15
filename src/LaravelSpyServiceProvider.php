@@ -3,6 +3,7 @@
 namespace Farayaz\LaravelSpy;
 
 use Farayaz\LaravelSpy\Commands\CleanCommand;
+use GuzzleHttp\Client;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\ServiceProvider;
 
@@ -57,6 +58,14 @@ class LaravelSpyServiceProvider extends ServiceProvider
     public function register()
     {
         $this->mergeConfigFrom(__DIR__ . '/../config/spy.php', 'spy');
+
+        if (config('spy.guzzle.enabled', true)) {
+            $this->app->singleton(Client::class, function ($app) {
+                return new Client([
+                    'handler' => LaravelSpy::handlerStack(),
+                ]);
+            });
+        }
     }
 
     protected function getMigrationFileName(string $file, Carbon $time): string

@@ -23,6 +23,7 @@ This package is useful for debugging, monitoring, and auditing external API call
 ## Features
 
 - Tracks all outgoing HTTP requests made via Laravel's HTTP client.
+- Tracks outgoing requests made with Guzzle (enabled by default).
 - Logs request details, including URL, method, headers, payload, and response.
 - Configurable logging options to customize and obfuscate sensitive data.
 
@@ -52,7 +53,7 @@ php artisan migrate
 
 
 ## Usage
-Once installed and configured, Laravel Spy automatically tracks all outgoing HTTP requests made using Laravel's Http facade or HTTP client. The package logs the following details for each request:
+Once installed and configured, Laravel Spy automatically tracks all outgoing HTTP requests made using Laravel's Http facade and Guzzle. The package logs the following details for each request:
 * The full URL of the request
 * The HTTP method (e.g., GET, POST, PUT)
 * Request Headers
@@ -71,121 +72,24 @@ Laravel Spy will log the details of this outgoing request to the `http_logs` tab
 Http::get('https://github.com/farayaz/laravel-spy/');
 ```
 
-### Guzzle client support
-
-For standalone Guzzle clients, attach Laravel Spy middleware to your `HandlerStack` explicitly:
-
-```php
-use Farayaz\LaravelSpy\LaravelSpy;
-use GuzzleHttp\Client;
-use GuzzleHttp\HandlerStack;
-
-$stack = HandlerStack::create();
-LaravelSpy::pushToHandlerStack($stack);
-
-$client = new Client([
-    'handler' => $stack,
-]);
-
-$client->get('https://api.example.com/users');
-```
-
-If you prefer the raw middleware callable, use `LaravelSpy::guzzleMiddleware()` and push it to the stack yourself.
-
-## Configuration
-To customize Laravel Spy, publish the config file and edit `config/spy.php`.
-
-### Basic Configuration
+## Quick Configuration
 
 Configure these via environment variables:
+
 ```bash
 SPY_ENABLED=true
+SPY_DASHBOARD_ENABLED=false
 ```
 
-### URL Exclusions
+## Documentation
 
-Exclude specific URLs from being logged via environment variable:
-```bash
-SPY_EXCLUDE_URLS=api/health,ping,status
-```
-
-### Data Obfuscation
-
-Laravel Spy can obfuscate sensitive data in your logs. By default, it obfuscates `password` and `token` fields, but you can customize this via environment variables:
-
-```bash
-SPY_OBFUSCATES=password,token,api_key,secret
-SPY_OBFUSCATION_MASK=***HIDDEN***
-```
-
-### Excluding Content Types from Logging
-
-You can configure Laravel Spy to exclude specific content types from being logged for both request and response bodies. This is useful for binary data, images, videos, or other content you do not want included in logs.
-```bash
-SPY_REQUEST_BODY_EXCLUDE_CONTENT_TYPES=image/
-SPY_RESPONSE_BODY_EXCLUDE_CONTENT_TYPES=video/,application/pdf
-```
-
-### Field Length and Row Limits
-
-Control field length and row limits:
-
-```bash
-SPY_FIELD_MAX_LENGTH=10000  # Maximum characters per field (default: 10000)
-SPY_FIELD_MAX_ROWS=10000    # Maximum number of log entries to retain (default: 10000)
-```
-
-### Automatic Log Retention
-
-Configure how long logs should be retained before automatic cleanup via environment variable:
-
-```bash
-SPY_CLEAN_DAYS=7  # Keep logs for 7 days (default is 30)
-```
-
-## Dashboard
-
-Laravel Spy includes a simple built-in dashboard at `/spy` with:
-
-```bash
-SPY_DASHBOARD_ENABLED=true
-SPY_DASHBOARD_MIDDLEWARE=web,auth
-```
-
-## Cleaning up logs
-
-Laravel Spy provides a `spy:clean` command to remove old HTTP logs:
-
-```bash
-# Clean logs based on your config
-php artisan spy:clean
-
-# Clean logs older than 30 days
-php artisan spy:clean --days=30
-
-# Clean logs matching URL pattern
-php artisan spy:clean --days=1 --url=api/users
-```
-
-### Automated cleanup
-
-You can schedule automatic cleanup in your Laravel scheduler:
-
-```php
-// app/Console/Kernel.php
-protected function schedule(Schedule $schedule)
-{
-  $schedule->command('spy:clean')->daily();
-}
-```
-
-## Contributing
-Contributions are welcome! To contribute to Laravel Spy:
-* Fork the repository on GitHub.
-* Clone your fork and create a new branch (git checkout -b feat-your-feature).
-* Run code style checks with Laravel Pint (vendor/bin/pint).
-* Commit your changes and push to your fork.
-* Create a pull request with a clear description of your changes.
+- [Configuration](docs/configuration.md)
+- [Guzzle Integration](docs/guzzle.md)
+- [Dashboard](docs/dashboard.md)
+- [Cleanup and Retention](docs/cleanup.md)
+- [Troubleshooting](docs/troubleshooting.md)
+- [Contributing](docs/contributing.md)
+- [Testing Guide](README_TESTING.md)
 
 ## Issues
 If you encounter any issues or have feature requests, please open an issue on the GitHub repository. Provide as much detail as possible, including:
