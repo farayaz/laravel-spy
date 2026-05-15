@@ -33,7 +33,7 @@ class HttpLog extends Model
     public function __construct(array $attributes = [])
     {
         if (! isset($this->connection)) {
-            $this->setConnection(config('spy.database_connection'));
+            $this->setConnection(config('spy.db_connection'));
         }
 
         if (! isset($this->table)) {
