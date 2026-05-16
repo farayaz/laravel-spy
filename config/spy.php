@@ -1,7 +1,7 @@
 <?php
 
 if (! function_exists('spy_parse_env_array')) {
-    function spy_parse_env_array($key, $default = '')
+    function spy_parse_env_array(string $key, string $default = ''): array
     {
         return array_filter(array_map('trim', explode(',', env($key, $default))));
     }
@@ -12,6 +12,13 @@ return [
     * Enable or disable the spy functionality.
     */
     'enabled' => env('SPY_ENABLED', true),
+
+    /*
+    * Enable or disable Guzzle injection.
+    */
+    'guzzle' => [
+        'enabled' => env('SPY_GUZZLE_ENABLED', true),
+    ],
 
     /*
     * The database table name for storing HTTP logs.
@@ -80,6 +87,6 @@ return [
         'prefix' => env('SPY_DASHBOARD_PREFIX', 'spy'),
 
         // Middleware(s) to apply to the dashboard routes, as a comma-separated list.
-        'middleware' => spy_parse_env_array('SPY_DASHBOARD_MIDDLEWARE', 'web'),
+        'middleware' => spy_parse_env_array('SPY_DASHBOARD_MIDDLEWARE', 'auth'),
     ],
 ];

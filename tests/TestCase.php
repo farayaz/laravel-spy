@@ -33,6 +33,7 @@ abstract class TestCase extends OrchestraTestCase
         ]);
 
         $app['config']->set('spy.enabled', true);
+        $app['config']->set('spy.guzzle.enabled', true);
         $app['config']->set('spy.table_name', 'http_logs');
         $app['config']->set('spy.db_connection', 'testing');
         $app['config']->set('spy.exclude_urls', []);
