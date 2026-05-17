@@ -4,6 +4,9 @@
   "type": "library",
   "license": "MIT",
   "autoload": {
+    "files": [
+      "src/Support/helpers.php"
+    ],
     "psr-4": {
       "Farayaz\\LaravelSpy\\": "src/"
     }

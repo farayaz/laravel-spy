@@ -1,12 +1,5 @@
 <?php
 
-if (! function_exists('spy_parse_env_array')) {
-    function spy_parse_env_array(string $key, string $default = ''): array
-    {
-        return array_filter(array_map('trim', explode(',', env($key, $default))));
-    }
-}
-
 return [
     /*
     * Enable or disable the spy functionality.
@@ -33,12 +26,13 @@ return [
     /*
     * URLs to exclude from logging, as a comma-separated list.
     */
-    'exclude_urls' => spy_parse_env_array('SPY_EXCLUDE_URLS'),
+    'exclude_urls' => spy_csv('SPY_EXCLUDE_URLS'),
 
     /*
     * Request fields to obfuscate in logs, as a comma-separated list.
     */
-    'obfuscates' => spy_parse_env_array('SPY_OBFUSCATES', 'password,token'),
+    // Example: '*:password,token|domain1.com:api_key|domain2.com:secret'
+    'obfuscates' => spy_rule_map('SPY_OBFUSCATES', '*:password,token'),
 
     /*
     * A mask string used to obfuscate fields in the logs.
@@ -55,14 +49,14 @@ return [
     * Can be set via the SPY_REQUEST_BODY_EXCLUDE_CONTENT_TYPES env variable (comma-separated).
     */
     // Example: 'video/,audio/,application/pdf,application/zip,application/x-zip-compressed,application/octet-stream,multipart/form-data'
-    'request_body_exclude_content_types' => spy_parse_env_array('SPY_REQUEST_BODY_EXCLUDE_CONTENT_TYPES', ''),
+    'request_body_exclude_content_types' => spy_csv('SPY_REQUEST_BODY_EXCLUDE_CONTENT_TYPES', ''),
 
     /*
     * Content types to exclude from response body logging.
     * Can be set via the SPY_RESPONSE_BODY_EXCLUDE_CONTENT_TYPES env variable (comma-separated).
     */
     // Example: 'video/,audio/,application/pdf,application/zip,application/x-zip-compressed,application/octet-stream'
-    'response_body_exclude_content_types' => spy_parse_env_array('SPY_RESPONSE_BODY_EXCLUDE_CONTENT_TYPES', ''),
+    'response_body_exclude_content_types' => spy_csv('SPY_RESPONSE_BODY_EXCLUDE_CONTENT_TYPES', ''),
 
     /*
     * Maximum length (in characters) for field values in logs.
@@ -87,6 +81,6 @@ return [
         'prefix' => env('SPY_DASHBOARD_PREFIX', 'spy'),
 
         // Middleware(s) to apply to the dashboard routes, as a comma-separated list.
-        'middleware' => spy_parse_env_array('SPY_DASHBOARD_MIDDLEWARE', 'auth'),
+        'middleware' => spy_csv('SPY_DASHBOARD_MIDDLEWARE', 'auth'),
     ],
 ];
