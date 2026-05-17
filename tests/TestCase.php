@@ -37,7 +37,7 @@ abstract class TestCase extends OrchestraTestCase
         $app['config']->set('spy.table_name', 'http_logs');
         $app['config']->set('spy.db_connection', 'testing');
         $app['config']->set('spy.exclude_urls', []);
-        $app['config']->set('spy.obfuscates', ['password', 'token']);
+        $app['config']->set('spy.obfuscates', ['*' => ['password', 'token']]);
         $app['config']->set('spy.clean_days', 30);
     }
 

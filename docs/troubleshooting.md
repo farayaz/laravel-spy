@@ -21,6 +21,9 @@ Check these items:
   - `SPY_REQUEST_BODY_EXCLUDE_CONTENT_TYPES`
   - `SPY_RESPONSE_BODY_EXCLUDE_CONTENT_TYPES`
 - Data may be obfuscated by `SPY_OBFUSCATES`.
+  - `*` rules apply to all domains.
+  - Domain-specific rules apply only to matching hosts.
+  - Example: `*:password,token|api.example.com:api_key`
 - Large values may be truncated by limits:
   - `SPY_FIELD_MAX_LENGTH`
   - `SPY_FIELD_MAX_ROWS`

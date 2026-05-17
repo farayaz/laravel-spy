@@ -88,6 +88,7 @@ SPY_DASHBOARD_ENABLED=false
 - [Dashboard](docs/dashboard.md)
 - [Cleanup and Retention](docs/cleanup.md)
 - [Troubleshooting](docs/troubleshooting.md)
+- [Upgrade Guide](docs/upgrade.md)
 - [Contributing](docs/contributing.md)
 - [Testing Guide](README_TESTING.md)
 

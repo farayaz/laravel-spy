@@ -27,12 +27,13 @@ class LaravelSpy
                     return $handler($request, $options);
                 }
 
+                $requestUri = $request->getUri();
                 $startedAt = microtime(true);
-                $httpLog = self::shouldLog($request) ? self::handleRequest($request) : null;
+                $httpLog = self::shouldLog($request) ? self::handleRequest($requestUri, $request) : null;
 
                 return $handler($request, $options)->then(
-                    fn (ResponseInterface $response) => self::handleResponse($response, $httpLog, $startedAt),
-                    fn (Throwable $exception) => self::handleException($exception, $httpLog, $startedAt)
+                    fn (ResponseInterface $response) => self::handleResponse($requestUri, $response, $httpLog, $startedAt),
+                    fn (Throwable $exception) => self::handleException($requestUri, $exception, $httpLog, $startedAt)
                 );
             };
         };
@@ -51,7 +52,7 @@ class LaravelSpy
         return ! Str::contains((string) $request->getUri(), config('spy.exclude_urls', []));
     }
 
-    protected static function handleRequest(RequestInterface $request): ?HttpLog
+    protected static function handleRequest(Uri $uri, RequestInterface $request): ?HttpLog
     {
         $requestBody = self::parseContent(
             'request',
@@ -60,10 +61,10 @@ class LaravelSpy
         );
         try {
             return HttpLog::create([
-                'url' => urldecode(self::obfuscate($request->getUri())),
+                'url' => urldecode((string) self::obfuscate($uri)),
                 'method' => $request->getMethod(),
-                'request_headers' => self::obfuscate($request->getHeaders()),
-                'request_body' => self::obfuscate($requestBody),
+                'request_headers' => self::obfuscate($request->getHeaders(), $uri),
+                'request_body' => self::obfuscate($requestBody, $uri),
             ]);
         } catch (Throwable $e) {
             report($e); // silence is golden
@@ -72,7 +73,7 @@ class LaravelSpy
         }
     }
 
-    protected static function handleResponse(ResponseInterface $response, ?HttpLog $httpLog, float $startedAt): ResponseInterface
+    protected static function handleResponse(Uri $uri, ResponseInterface $response, ?HttpLog $httpLog, float $startedAt): ResponseInterface
     {
         if ($httpLog) {
             try {
@@ -84,8 +85,8 @@ class LaravelSpy
                 $httpLog->update([
                     'status' => $response->getStatusCode(),
                     'duration_ms' => self::calculateDurationMs($startedAt),
-                    'response_body' => self::obfuscate($responseBody),
-                    'response_headers' => self::obfuscate($response->getHeaders()),
+                    'response_body' => self::obfuscate($responseBody, $uri),
+                    'response_headers' => self::obfuscate($response->getHeaders(), $uri),
                 ]);
             } catch (Throwable $e) {
                 report($e); // silence is golden
@@ -95,14 +96,14 @@ class LaravelSpy
         return $response;
     }
 
-    protected static function handleException(Throwable $exception, ?HttpLog $httpLog, float $startedAt): void
+    protected static function handleException(Uri $uri, Throwable $exception, ?HttpLog $httpLog, float $startedAt): void
     {
         if ($httpLog) {
             try {
                 $httpLog->update([
                     'status' => 0,
                     'duration_ms' => self::calculateDurationMs($startedAt),
-                    'response_body' => $exception->getMessage(),
+                    'response_body' => self::obfuscate($exception->getMessage(), $uri),
                 ]);
             } catch (Throwable $e) {
                 report($e); // silence is golden
@@ -176,12 +177,12 @@ class LaravelSpy
         return $content;
     }
 
-    public static function obfuscate(mixed $data): mixed
+    public static function obfuscate(mixed $data, ?Uri $uri = null): mixed
     {
         $mask = config('spy.obfuscation_mask');
-        $obfuscates = config('spy.obfuscates', []);
+        $obfuscates = self::obfuscationKeys($uri);
         $fieldMaxLength = config('spy.field_max_length', 10000);
-        $fieldMaxRows = config('spy.field_max_rows', 1000);
+        $fieldMaxRows = config('spy.field_max_rows', 10000);
 
         if (is_array($data)) {
             if ($fieldMaxRows && count($data) > $fieldMaxRows) {
@@ -203,7 +204,7 @@ class LaravelSpy
                 }
 
                 if (is_array($v)) {
-                    $v = self::obfuscate($v);
+                    $v = self::obfuscate($v, $uri);
                 } elseif (is_string($v)) {
                     $v = Str::limit($v, $fieldMaxLength);
                 }
@@ -213,9 +214,36 @@ class LaravelSpy
         } elseif ($data instanceof Uri) {
             parse_str($data->getQuery(), $query);
 
-            return $data->withQuery(http_build_query(self::obfuscate($query)));
+            $uri = $uri ?? $data;
+
+            return $data->withQuery(http_build_query(self::obfuscate($query, $uri)));
         }
 
         return $data;
+    }
+
+    protected static function obfuscationKeys(?Uri $uri): array
+    {
+        $rules = config('spy.obfuscates', []);
+        $keys = $rules['*'] ?? [];
+
+        if (! is_array($keys)) {
+            $keys = [$keys];
+        }
+
+        if ($uri === null) {
+            return array_values(array_unique(array_filter($keys, fn ($value) => is_string($value) && $value !== '')));
+        }
+
+        $domain = $uri->getHost();
+        if ($domain !== '' && array_key_exists($domain, $rules)) {
+            $domainKeys = $rules[$domain];
+            if (! is_array($domainKeys)) {
+                $domainKeys = [$domainKeys];
+            }
+            $keys = array_merge($keys, $domainKeys);
+        }
+
+        return array_values(array_unique(array_filter($keys, fn ($value) => is_string($value) && $value !== '')));
     }
 }

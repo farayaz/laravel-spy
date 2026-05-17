@@ -175,4 +175,42 @@ class LaravelSpyTest extends TestCase
 
         $this->assertEquals($data, $result);
     }
+
+    /** @test */
+    public function it_applies_domain_specific_obfuscation_rules()
+    {
+        config()->set('spy.obfuscates', [
+            '*' => ['password', 'token'],
+            'api.example.com' => ['api_key', 'secret'],
+        ]);
+
+        $uri = new Uri('https://api.example.com/users');
+        $data = [
+            'password' => 'secret123',
+            'api_key' => 'abc123',
+            'secret' => 'zzz999',
+            'email' => 'john@example.com',
+        ];
+
+        $result = LaravelSpy::obfuscate($data, $uri);
+
+        $this->assertEquals([
+            'password' => '🫣',
+            'api_key' => '🫣',
+            'secret' => '🫣',
+            'email' => 'john@example.com',
+        ], $result);
+    }
+
+    /** @test */
+    public function it_parses_rule_map_from_direct_string()
+    {
+        $rules = spy_rule_map('pass|*:password|domain1.com:api_key|domain2.com:secret');
+
+        $this->assertEquals([
+            '*' => ['pass', 'password'],
+            'domain1.com' => ['api_key'],
+            'domain2.com' => ['secret'],
+        ], $rules);
+    }
 }
