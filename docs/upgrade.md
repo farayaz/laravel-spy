@@ -1,7 +1,7 @@
 # Upgrade Guide
 
-Re-publish the config to get the latest keys and comments:
+Re-publish the config and migrations:
 
 ```bash
-php artisan vendor:publish --provider="Farayaz\LaravelSpy\LaravelSpyServiceProvider" --tag=config --force
+php artisan vendor:publish --provider="Farayaz\LaravelSpy\LaravelSpyServiceProvider" --force
 ```
