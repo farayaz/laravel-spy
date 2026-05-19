@@ -37,7 +37,7 @@ Any request URL containing one of these values will not be logged.
 ## Obfuscation
 
 ```bash
-SPY_OBFUSCATES='*:password,token|domain1.com:api_key|domain2.com:secret'
+SPY_OBFUSCATES='*:password,token|domain1.com:pass|domain2.com:data|domain1.com,domain2.com:secret,key|domain2.com:secret2,secret3'
 SPY_OBFUSCATION_MASK=🫣
 ```
 
@@ -47,12 +47,13 @@ SPY_OBFUSCATION_MASK=🫣
 Rules use this format:
 
 ```bash
-*:password,token|domain1.com:api_key|domain2.com:secret
+*:password,token|domain1.com:pass|domain2.com:data|domain1.com,domain2.com:secret,key|domain2.com:secret2,secret3
 ```
 
 - `*`: fields that should be masked for all domains.
 - `domain.com`: extra fields that should be masked only for that domain.
 - Multiple values are comma-separated inside each rule.
+- Multiple domains can be grouped with a comma (e.g. `domain1.com,domain2.com:key`).
 
 ## Content-Type Exclusions
 
