@@ -16,11 +16,11 @@ if (! function_exists('spy_rule_map')) {
             if (strpos($part, ':') === false) {
                 $result['*'] = array_merge($result['*'] ?? [], explode(',', $part));
             } else {
-                [$domain, $keys] = explode(':', $part, 2);
-                if ($domain === '*') {
-                    $result['*'] = array_merge($result['*'] ?? [], explode(',', $keys));
-                } else {
-                    $result[$domain] = array_merge($result[$domain] ?? [], explode(',', $keys));
+                [$domains, $keys] = explode(':', $part, 2);
+                $keyList = explode(',', $keys);
+                foreach (explode(',', $domains) as $domain) {
+                    $domain = trim($domain);
+                    $result[$domain] = array_merge($result[$domain] ?? [], $keyList);
                 }
             }
         }
