@@ -6,6 +6,7 @@ use Farayaz\LaravelSpy\LaravelSpy;
 use Farayaz\LaravelSpy\Models\HttpLog;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ConnectException;
+use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
@@ -126,7 +127,18 @@ class GuzzleLoggingTest extends TestCase
         $client = app(Client::class);
 
         $this->assertInstanceOf(Client::class, $client);
-        $this->assertStringContainsString('laravel-spy', (string) $client->getConfig('handler'));
+        $handler = $client->getConfig('handler');
+        $this->assertInstanceOf(HandlerStack::class, $handler);
+        $handler->setHandler(new MockHandler([
+            new Response(200, ['Content-Type' => 'application/json'], json_encode(['ok' => true])),
+        ]));
+
+        $client->get('https://api.example.com/container');
+
+        $this->assertDatabaseHas('http_logs', [
+            'url' => 'https://api.example.com/container',
+            'status' => 200,
+        ]);
     }
 
     /** @test */

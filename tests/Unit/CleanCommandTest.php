@@ -132,9 +132,7 @@ class CleanCommandTest extends TestCase
         $testLog->created_at = Carbon::now()->subDays(35);
         $testLog->save();
 
-        $this->artisan('spy:clean', ['--days' => 30])
-            ->expectsQuestion('Are you sure you want to run this command?', false)
-            ->assertExitCode(0);
+        $this->artisan('spy:clean', ['--days' => 30])->assertExitCode(0);
 
         $this->assertDatabaseHas('http_logs', [
             'url' => 'https://api.example.com/test',

@@ -205,7 +205,7 @@ class LaravelSpyTest extends TestCase
     /** @test */
     public function it_parses_rule_map_from_direct_string()
     {
-        $rules = spy_rule_map('pass|*:password|domain1.com:api_key|domain2.com:secret');
+        $rules = spy_rule_map('SPY_TEST_RULE_MAP', 'pass|*:password|domain1.com:api_key|domain2.com:secret');
 
         $this->assertEquals([
             '*' => ['pass', 'password'],

@@ -16,7 +16,7 @@
 
 # Laravel Spy
 
-**Laravel Spy** is a lightweight Laravel package designed to track and log outgoing HTTP requests made by your Laravel application.
+**Laravel Spy** logs outgoing HTTP requests and API calls from your Laravel app.
 
 This package is useful for debugging, monitoring, and auditing external API calls or HTTP requests, providing developers with a zero config, simple way to inspect request details such as URLs, methods, headers, and responses.
 
@@ -29,8 +29,8 @@ This package is useful for debugging, monitoring, and auditing external API call
 
 ## Requirements
 
-- **PHP**: ^8.1
-- **Laravel**: ^10.0 | ^11.0 | ^12.0 | ^13.0
+- **PHP**: ^8.2
+- **Laravel**: ^12.69.0 | ^13.30.0
 - **Development Dependencies** (optional):
   - `laravel/pint`: ^1.0 (for code style linting)
   - `phpunit/phpunit`: ^9.0 | ^10.0 | ^11.0 (for running tests)
