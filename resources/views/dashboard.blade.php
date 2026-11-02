@@ -6,10 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>Laravel Spy · Dashboard</title>
-
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=jetbrains-mono:300" rel="stylesheet" />
+    <title>Laravel Spy · {{ $view === 'analytics' ? 'Analytics' : 'HTTP logs' }}</title>
 
     <style>
         :root {
@@ -23,7 +20,7 @@
         }
 
         * {
-            font-family: 'JetBrains Mono', monospace !important;
+            font-family: ui-monospace, SFMono-Regular, Consolas, 'Liberation Mono', monospace !important;
             box-sizing: border-box;
         }
 
@@ -155,25 +152,56 @@
             color: #9bb6ff;
             text-decoration: none;
         }
+        input { background:#0e1527; color:var(--ink); border:1px solid #1f2942; border-radius:10px; padding:8px 10px; }
+        .filters { display:flex; flex-wrap:wrap; gap:8px; margin:12px 0; }
+        .table-wrap { overflow-x:auto; }
+        td.url { max-width:480px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        .pagination { display:flex; justify-content:space-between; margin-top:14px; }
+        .tabs { display:flex; gap:8px; margin:16px 0; }
+        .tabs a { padding:9px 16px; border:1px solid #293757; border-radius:9px; }
+        .tabs a.active { background:#324d83; color:white; }
+        .toolbar { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:10px; }
+        .toolbar form { display:flex; gap:8px; }
+        button { background:#324d83; color:white; border:0; border-radius:9px; padding:8px 12px; cursor:pointer; }
+        .badge { display:inline-block; border-radius:999px; padding:3px 8px; background:#24314c; }
+        .badge.ok { color:var(--ok); } .badge.warn { color:var(--warn); } .badge.bad { color:var(--bad); }
+        dialog { width:min(760px,96vw); height:100vh; max-height:100vh; margin:0 0 0 auto; padding:0; border:1px solid #293757; border-radius:14px 0 0 14px; background:#141b2d; color:var(--ink); }
+        dialog::backdrop { background:rgba(0,0,0,.75); }
+        dialog iframe { border:0; width:100%; height:calc(100% - 52px); }
+        .dialog-head { display:flex; justify-content:space-between; padding:10px 16px; align-items:center; }
+        @media(max-width:750px) { .grid { grid-template-columns:repeat(2,1fr); } header { align-items:flex-start; gap:12px; flex-direction:column; } .wrap { margin:16px auto; } }
     </style>
 </head>
 
 <body>
     <div class="wrap">
         <header>
-            <h1>Laravel Spy · Dashboard</h1>
+            <h1>Laravel Spy · {{ $view === 'analytics' ? 'Analytics' : 'HTTP logs' }}</h1>
             <form method="get">
+                <input type="hidden" name="url" value="{{ $url }}">
+                <input type="hidden" name="method" value="{{ $method }}">
+                <input type="hidden" name="status" value="{{ $status }}">
+                <input type="hidden" name="min_duration" value="{{ $minDuration }}">
+                <input type="hidden" name="sort" value="{{ $sort }}">
+                <input type="hidden" name="per_page" value="{{ $perPage }}">
                 <label class="muted">
                     Period
                     <select name="period" onchange="this.form.submit()">
                         <option value="24h" {{ $period === '24h' ? 'selected' : '' }}>Last 24h</option>
                         <option value="7d" {{ $period === '7d' ? 'selected' : '' }}>Last 7 days</option>
                         <option value="30d" {{ $period === '30d' ? 'selected' : '' }}>Last 30 days</option>
+                        <option value="all" {{ $period === 'all' ? 'selected' : '' }}>All time</option>
                     </select>
                 </label>
             </form>
         </header>
 
+        <nav class="tabs" aria-label="Dashboard views">
+            <a class="{{ $view === 'analytics' ? 'active' : '' }}" href="{{ route('spy.dashboard.index', ['period' => $period]) }}">Analytics</a>
+            <a class="{{ $view === 'logs' ? 'active' : '' }}" href="{{ route('spy.dashboard.logs.index', ['period' => $period]) }}">HTTP logs</a>
+        </nav>
+
+        @if($view === 'analytics')
         <section class="card">
             <div class="grid">
                 <div class="kpi">
@@ -210,46 +238,89 @@
                     <h3 class="muted" style="margin:0 0 8px 0; font-size:13px;">Requests over time</h3>
 
                     <div class="muted" style="margin-top:6px; font-size:12px;">
-                        From {{ $from->format('Y-m-d H:i') }} to now
+                        {{ $from ? 'From ' . $from->format('Y-m-d H:i') . ' to now' : 'All time' }}
                     </div>
 
-                    <div id="chart" style="width: 100%;height: 100px"></div>
+                    <div id="chart" style="width: 100%; height: 220px"></div>
                 </div>
             </div>
 
             <div class="row">
                 <div class="card" style="flex:1">
                     <h3 class="muted" style="margin:0 0 8px 0; font-size:13px;">Top failing URLs (5xx)</h3>
+                    <table><thead><tr><th>URL</th><th>Failures</th></tr></thead><tbody>
+                    @forelse($topFailures as $row)
+                        <tr><td>{{ $row->url }}</td><td>{{ $row->failures }}</td></tr>
+                    @empty
+                        <tr><td colspan="2" class="muted">No 5xx requests in this period.</td></tr>
+                    @endforelse
+                    </tbody></table>
+                </div>
+            </div>
+        </section>
+        @else
+        <section class="card">
 
-                    <div class="muted" style="margin-top:6px; font-size:12px;">
-                        From {{ $from->format('Y-m-d H:i') }} to now
-                    </div>
-
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>URL</th>
-                                <th>Failures</th>
-                            </tr>
-                        </thead>
+            <div class="row">
+                <div class="card" style="flex:1; min-width:0">
+                    <div class="toolbar"><div><h2 style="margin:0">HTTP logs</h2><small class="muted">{{ number_format($logs->total()) }} matching requests</small></div>
+                        <form method="get"><input type="hidden" name="period" value="{{ $period }}"><input type="hidden" name="url" value="{{ $url }}"><input type="hidden" name="method" value="{{ $method }}"><input type="hidden" name="status" value="{{ $status }}"><input type="hidden" name="min_duration" value="{{ $minDuration }}">
+                            <select name="sort" aria-label="Sort order" onchange="this.form.submit()"><option value="newest" @selected($sort === 'newest')>Newest first</option><option value="oldest" @selected($sort === 'oldest')>Oldest first</option></select>
+                            <select name="per_page" aria-label="Rows per page" onchange="this.form.submit()">@foreach([10,20,50] as $size)<option value="{{ $size }}" @selected($perPage === $size)>{{ $size }} per page</option>@endforeach</select>
+                        </form></div>
+                    <form method="get" class="filters">
+                        <input type="hidden" name="period" value="{{ $period }}">
+                        <input type="hidden" name="sort" value="{{ $sort }}">
+                        <input type="hidden" name="per_page" value="{{ $perPage }}">
+                        <input name="url" value="{{ $url }}" placeholder="Search URL" aria-label="Search URL">
+                        <select name="method" aria-label="Method">
+                            <option value="">All methods</option>
+                            @foreach(['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'] as $option)
+                                <option value="{{ $option }}" @selected($method === $option)>{{ $option }}</option>
+                            @endforeach
+                        </select>
+                        <select name="status" aria-label="Status">
+                            <option value="">All statuses</option>
+                            @foreach(['0' => 'Connection error', '2xx' => '2xx', '3xx' => '3xx', '4xx' => '4xx', '5xx' => '5xx'] as $value => $label)
+                                <option value="{{ $value }}" @selected($status === (string) $value)>{{ $label }}</option>
+                            @endforeach
+                        </select>
+                        <input type="number" name="min_duration" min="0" value="{{ $minDuration }}" placeholder="Min ms" aria-label="Minimum duration in milliseconds">
+                        <button type="submit">Filter</button>
+                        <a href="{{ route('spy.dashboard.logs.index', ['period' => $period]) }}" style="padding:8px">Clear</a>
+                    </form>
+                    <div class="table-wrap"><table>
+                        <thead><tr><th>Time</th><th>Method</th><th>URL</th><th>Status</th><th>Duration</th></tr></thead>
                         <tbody>
-                            @forelse($topFailures as $row)
+                            @forelse($logs as $log)
                                 <tr>
-                                    <td>{{ $row->url }}</td>
-                                    <td>{{ $row->failures }}</td>
+                                    <td>{{ $log->created_at?->format('Y-m-d H:i:s') }}</td>
+                                    <td>{{ $log->method }}</td>
+                                    <td class="url" title="{{ $log->url }}"><a class="detail-link" href="{{ route('spy.dashboard.logs.show', $log) }}">{{ $log->url }}</a></td>
+                                    <td><span class="badge {{ $log->status >= 500 || $log->status === 0 ? 'bad' : ($log->status >= 400 ? 'warn' : 'ok') }}">{{ $log->status === 0 ? 'Error' : ($log->status ?? 'Pending') }}</span></td>
+                                    <td>{{ $log->duration_ms === null ? '—' : $log->duration_ms . ' ms' }}</td>
                                 </tr>
                             @empty
-                                <tr>
-                                    <td colspan="2" class="muted" style="text-align: center;">No 5xx requests in the
-                                        selected period.</td>
-                                </tr>
+                                <tr><td colspan="5" class="muted" style="text-align:center">No logs match these filters.</td></tr>
                             @endforelse
                         </tbody>
-                    </table>
+                    </table></div>
+                    <div class="pagination">
+                        <span>{{ $logs->firstItem() ?? 0 }}–{{ $logs->lastItem() ?? 0 }} of {{ $logs->total() }}</span>
+                        <span>Page {{ $logs->currentPage() }} of {{ $logs->lastPage() }}</span>
+                        <span>@if($logs->currentPage() > 1)<a href="{{ $logs->url(1) }}">First</a> · <a href="{{ $logs->previousPageUrl() }}">Previous</a> · @endif
+                            @for($page = max(1, $logs->currentPage()-2); $page <= min($logs->lastPage(), $logs->currentPage()+2); $page++)
+                                <a href="{{ $logs->url($page) }}" @if($page === $logs->currentPage()) aria-current="page" @endif>{{ $page }}</a>
+                            @endfor
+                            @if($logs->nextPageUrl()) · <a href="{{ $logs->nextPageUrl() }}">Next</a> · <a href="{{ $logs->url($logs->lastPage()) }}">Last</a>@endif</span>
+                    </div>
                 </div>
             </div>
 
         </section>
+        @endif
+
+        <dialog id="log-detail"><div class="dialog-head"><strong>HTTP log details</strong><button type="button" onclick="this.closest('dialog').close()">Close</button></div><iframe title="HTTP log details"></iframe></dialog>
 
         <footer>
             Built
@@ -260,7 +331,8 @@
         </footer>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    @if($view === 'analytics')
+    <script src="{{ route('spy.dashboard.chart-script', ['v' => $chartScriptVersion]) }}"></script>
 
     <script>
         options = {
@@ -272,14 +344,21 @@
             },
             chart: {
                 type: 'line',
-                height: '500px',
+                height: 220,
                 background: '#141b2d',
                 zoom: {
                     enabled: false
                 }
             },
             stroke: {
-                curve: 'smooth',
+                curve: 'straight',
+            },
+            yaxis: {
+                min: 0,
+                forceNiceScale: true,
+                labels: {
+                    formatter: function (value) { return Math.round(value).toString(); }
+                }
             },
             plotOptions: {
                 bar: {
@@ -301,6 +380,30 @@
         var chart = new ApexCharts(document.querySelector("#chart"), options);
 
         chart.render();
+    </script>
+    @endif
+    <script>
+        var detailDialog = document.getElementById('log-detail');
+        detailDialog.addEventListener('click', function(event) {
+            if (event.target !== detailDialog) return;
+            var bounds = detailDialog.getBoundingClientRect();
+            if (event.clientX < bounds.left || event.clientX > bounds.right ||
+                event.clientY < bounds.top || event.clientY > bounds.bottom) {
+                detailDialog.close();
+            }
+        });
+        detailDialog.addEventListener('cancel', function() {
+            detailDialog.close();
+        });
+        document.querySelectorAll('.detail-link').forEach(function(link) {
+            link.addEventListener('click', function(event) {
+                var dialog = document.getElementById('log-detail');
+                if (!dialog || !dialog.showModal) return;
+                event.preventDefault();
+                dialog.querySelector('iframe').src = link.href + '?embed=1';
+                dialog.showModal();
+            });
+        });
     </script>
 </body>
 
