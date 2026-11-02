@@ -85,11 +85,12 @@ Used by the cleanup command default (`spy:clean`).
 ## Dashboard
 
 ```bash
-SPY_DASHBOARD_ENABLED=false
-SPY_DASHBOARD_PREFIX=spy
-SPY_DASHBOARD_MIDDLEWARE=web
+SPY_DASHBOARD_ENABLED=true
+SPY_DASHBOARD_MIDDLEWARE=web,auth,admin
 ```
 
 - `SPY_DASHBOARD_ENABLED`: enables dashboard routes.
-- `SPY_DASHBOARD_PREFIX`: route prefix.
-- `SPY_DASHBOARD_MIDDLEWARE`: comma-separated middleware list.
+- `SPY_DASHBOARD_MIDDLEWARE`: comma-separated middleware list for all dashboard
+  routes. Replace `admin` with your application's access middleware, such as
+  `can:admin` or `role:admin` if those are available in your application. Set
+  this before enabling the dashboard. See [Dashboard](dashboard.md#enable-dashboard).
